@@ -12,15 +12,25 @@
                       ResizeMode="CanResizeWithGrip"
 
                       WindowTransitionsEnabled="False"
-                      WindowStartupLocation="CenterScreen"
+                      WindowStartupLocation="CenterOwner"
                       PreviewKeyDown="MainWindow_KeyDown"
-                      ShowTitleBar="True"
-                      WindowState="Maximized">
+                      ShowTitleBar="True">
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
+            <Controls:Flyout Grid.Row="1" Grid.Column="1" Position="Right" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                        Width="300" Header="Settings" IsOpen="False" Name="SettingsFlyout" Background="#FF1F1F1F">
+
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="SettingsGrid">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                    </Grid.RowDefinitions>
+                    <Controls:ToggleSwitch Style="{StaticResource ResourceKey=FileModeSwitchStyle}" Name="FileModeSwitcher"></Controls:ToggleSwitch>
+                    <Button Style="{StaticResource ResourceKey=AddKeyButtonStyle}" Click="AddKeyButton_Click"></Button>
+                </Grid>
+            </Controls:Flyout>
         </Controls:FlyoutsControl>
     </Controls:MetroWindow.Flyouts>
-    <Grid Name="MainGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+    <Grid Name="MainGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#FF2D2D30">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="70*"/>
         </Grid.ColumnDefinitions>
@@ -43,20 +53,9 @@
             </Button>
         </Grid>
         <Grid Name="ImageGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0">
-            
+
             <Image Name="Picture" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseDown="Image_MouseDown">
             </Image>
         </Grid>
-        <Controls:Flyout Grid.Row="1" Grid.Column="1" Position="Right" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                        Width="300" Header="Settings" IsOpen="False" Name="SettingsFlyout">
-
-            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="SettingsGrid">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="30"/>
-                </Grid.RowDefinitions>
-                <Controls:ToggleSwitch Style="{StaticResource ResourceKey=FileModeSwitchStyle}" Name="FileModeSwitcher"></Controls:ToggleSwitch>
-                <Button Style="{StaticResource ResourceKey=AddKeyButtonStyle}" Click="AddKeyButton_Click"></Button>
-            </Grid>
-        </Controls:Flyout>
     </Grid>
 </Controls:MetroWindow>

@@ -26,6 +26,7 @@ namespace ImageManager
 		{
 			InitializeComponent();
 			LoadSettingsFromFile();
+			WindowButtonCommandsOverlayBehavior = WindowCommandsOverlayBehavior.Never;
 		}
 
 		private void Image_MouseDown(object sender, MouseButtonEventArgs e)
