@@ -44,7 +44,7 @@ namespace ImageManager
 			WindowStyle = WindowStyle.SingleBorderWindow;
 			IgnoreTaskbarOnMaximize = false;
 			ShowTitleBar = true;
-			ButtonsGrid.Height = 30;
+			ButtonsGrid.Height = 120;
 			isFullScreenEnabled = false;
 			ShowCloseButton = true;
 			ShowMinButton = true;
@@ -108,11 +108,6 @@ namespace ImageManager
 			SettingsGrid.Children.Add(stackPanel);
 		}
 
-		private void SettingsButton_Click(object sender, RoutedEventArgs e)
-		{
-			SettingsFlyout.IsOpen = true;
-		}
-
 		private string ShowSelectFolderDialog()
 		{
 			var selectedPath = string.Empty;
@@ -138,6 +133,96 @@ namespace ImageManager
 			}
 			else
 				Picture.Source = null;
+		}
+
+		private void CreateFolder(string path)
+		{
+			if (!Directory.Exists(path))
+			{
+				Directory.CreateDirectory(path);
+			}
+		}
+
+		private void MoveImage(string directoryPath)
+		{
+			if (Picture.Source == null)
+				return;
+
+			CreateFolder(directoryPath);
+
+			if (!File.Exists(Path.Combine(directoryPath, currentImage.Name)))
+			{
+				File.Copy(currentImage.FullPath, Path.Combine(directoryPath, currentImage.Name));
+			}
+			if (FileModeSwitcher.IsChecked == true)
+			{
+				var currentImagePath = currentImage.FullPath;
+				allImagesPath.Remove(currentImagePath);
+
+				var nextImageIndex = FileManager.GetNextImageIndex(allImagesPath, currentImage);
+				var nextImagePath = allImagesPath.Count != 0 ?
+					allImagesPath[nextImageIndex] :
+					null;
+
+				ShowImage(nextImagePath);
+				File.Delete(currentImagePath);
+			}
+
+		}
+
+		private void ClearGrid(Grid grid)
+		{
+			grid.Children.Clear();
+			grid.RowDefinitions.Clear();
+			grid.ColumnDefinitions.Clear();
+		}
+
+		private void AddControlPanelToGrid(List<ControlPanel> controlPanels)
+		{
+			foreach (ControlPanel cp in controlPanels)
+			{
+				AddControlPanelToGrid(cp);
+			}
+		}
+
+		private void AddControlPanelToGrid(ControlPanel cp)
+		{
+			SettingsGrid.RowDefinitions.Add(cp.ControlRow);
+			SettingsGrid.Children.Add(cp.ControlStackPanel);
+
+			SettingsManager.RefreshSettings(controlPanels, settings);
+			SaveSettings(settings);
+		}
+
+		private void CreateControlPanel()
+		{
+			if (controlPanels.Count >= 8)
+				return;
+
+			var cp = new ControlPanel(controlPanels.Count + 1);
+
+			cp.KeyTextBox.PreviewKeyDown += Controls_KeyDown;
+			cp.DeleteKeyButton.Click += DeleteKeyButton_Click;
+			cp.SubfolderTextBox.TextChanged += SubfolderTextBox_TextChanged;
+			cp.KeyTextBox.TextChanged += KeyTextBox_TextChanged;
+
+			AddControlPanelToGrid(cp);
+			controlPanels.Add(cp);
+
+			SettingsManager.RefreshSettings(controlPanels, settings);
+			SaveSettings(settings);
+		}
+
+		private void AddKeyButton_Click(object sender, RoutedEventArgs e)
+		{
+			CreateControlPanel();
+			SettingsManager.RefreshSettings(controlPanels, settings);
+			SaveSettings(settings);
+		}
+
+		private void SettingsButton_Click(object sender, RoutedEventArgs e)
+		{
+			SettingsFlyout.IsOpen = true;
 		}
 
 		private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
@@ -180,41 +265,6 @@ namespace ImageManager
 					MoveImage(newImagePath);
 				}
 			}
-		}
-
-		private void CreateFolder(string path)
-		{
-			if (!Directory.Exists(path))
-			{
-				Directory.CreateDirectory(path);
-			}
-		}
-
-		private void MoveImage(string directoryPath)
-		{
-			if (Picture.Source == null)
-				return;
-
-			CreateFolder(directoryPath);
-
-			if (!File.Exists(Path.Combine(directoryPath, currentImage.Name)))
-			{
-				File.Copy(currentImage.FullPath, Path.Combine(directoryPath, currentImage.Name));
-			}
-			if (FileModeSwitcher.IsChecked == true)
-			{
-				var currentImagePath = currentImage.FullPath;
-				allImagesPath.Remove(currentImagePath);
-
-				var nextImageIndex = FileManager.GetNextImageIndex(allImagesPath, currentImage);
-				var nextImagePath = allImagesPath.Count != 0 ?
-					allImagesPath[nextImageIndex] :
-					null;
-
-				ShowImage(nextImagePath);
-				File.Delete(currentImagePath);
-			}
-
 		}
 
 		private void Controls_KeyDown(object sender, KeyEventArgs e)
@@ -271,13 +321,6 @@ namespace ImageManager
 			SaveSettings(settings);
 		}
 
-		private void ClearGrid(Grid grid)
-		{
-			grid.Children.Clear();
-			grid.RowDefinitions.Clear();
-			grid.ColumnDefinitions.Clear();
-		}
-
 		private void DeleteKeyButton_Click(object sender, RoutedEventArgs e)
 		{
 			var button = (Button)sender;
@@ -291,49 +334,5 @@ namespace ImageManager
 			SettingsManager.RefreshSettings(controlPanels, settings);
 			SaveSettings(settings);
 		}
-
-		private void AddControlPanelToGrid(List<ControlPanel> controlPanels)
-		{
-			foreach (ControlPanel cp in controlPanels)
-			{
-				AddControlPanelToGrid(cp);
-			}
-		}
-
-		private void AddControlPanelToGrid(ControlPanel cp)
-		{
-			SettingsGrid.RowDefinitions.Add(cp.ControlRow);
-			SettingsGrid.Children.Add(cp.ControlStackPanel);
-
-			SettingsManager.RefreshSettings(controlPanels, settings);
-			SaveSettings(settings);
-		}
-
-		private void CreateControlPanel()
-		{
-			if (controlPanels.Count >= 8)
-				return;
-
-			var cp = new ControlPanel(controlPanels.Count + 1);
-
-			cp.KeyTextBox.PreviewKeyDown += Controls_KeyDown;
-			cp.DeleteKeyButton.Click += DeleteKeyButton_Click;
-			cp.SubfolderTextBox.TextChanged += SubfolderTextBox_TextChanged;
-			cp.KeyTextBox.TextChanged += KeyTextBox_TextChanged;
-
-			AddControlPanelToGrid(cp);
-			controlPanels.Add(cp);
-
-			SettingsManager.RefreshSettings(controlPanels, settings);
-			SaveSettings(settings);
-		}
-
-		private void AddKeyButton_Click(object sender, RoutedEventArgs e)
-		{
-			CreateControlPanel();
-			SettingsManager.RefreshSettings(controlPanels, settings);
-			SaveSettings(settings);
-		}
-
 	}
 }

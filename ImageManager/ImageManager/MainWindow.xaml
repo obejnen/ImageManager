@@ -24,18 +24,26 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="70*"/>
         </Grid.ColumnDefinitions>
-        <Grid Name="ButtonsGrid" VerticalAlignment="Top" HorizontalAlignment="Stretch" Grid.Column="0" Grid.Row="0" Height="30">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="10*"/>
-                <ColumnDefinition Width="80*"/>
-                <ColumnDefinition Width="10*"/>
-            </Grid.ColumnDefinitions>
-            <Button Style="{DynamicResource SquareButtonStyle}" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0,0,0,0"
-                    Content="Open folder" BorderBrush="{x:Null}" Grid.Column="0" Click="OpenFolderButton_Click"></Button>
-            <Button Style="{DynamicResource SquareButtonStyle}" VerticalAlignment="Center" HorizontalAlignment="Stretch" Content="Settings"
-                    Margin="0,0,5,0" Grid.Column="2" BorderBrush="{x:Null}" Click="SettingsButton_Click"></Button>
+        <Grid Name="ButtonsGrid" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0" Height="140" Width="60">
+            <Button Style="{DynamicResource MetroCircleButtonStyle}" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Width="50" Height="50" Margin="0,5,5,0" Click="SettingsButton_Click" BorderBrush="LightBlue">
+                <Rectangle Width="25" Height="25" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_settings}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </Button>
+            <Button Style="{DynamicResource MetroCircleButtonStyle}" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Width="50" Height="50" Margin="0,60,5,0" Click="OpenFolderButton_Click" BorderBrush="LightBlue">
+                <Rectangle Width="25" Height="25" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_folder}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </Button>
         </Grid>
         <Grid Name="ImageGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0">
+            
             <Image Name="Picture" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseDown="Image_MouseDown">
             </Image>
         </Grid>
