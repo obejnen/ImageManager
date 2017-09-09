@@ -1,0 +1,54 @@
+﻿<Controls:MetroWindow x:Class="ImageManager.MainWindow" Name="AppWindow"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+                      Title="Image Manager"
+                      Height="600"
+                      Width="1000"
+
+                      WindowTitleBrush="#FF2D2D30"
+                      BorderThickness="0" 
+                      GlowBrush="Black"
+                      ResizeMode="CanResizeWithGrip"
+
+                      WindowTransitionsEnabled="False"
+                      WindowStartupLocation="CenterScreen"
+                      PreviewKeyDown="MainWindow_KeyDown"
+                      ShowTitleBar="True"
+                      WindowState="Maximized">
+    <Controls:MetroWindow.Flyouts>
+        <Controls:FlyoutsControl>
+        </Controls:FlyoutsControl>
+    </Controls:MetroWindow.Flyouts>
+    <Grid Name="MainGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="70*"/>
+        </Grid.ColumnDefinitions>
+        <Grid Name="ButtonsGrid" VerticalAlignment="Top" HorizontalAlignment="Stretch" Grid.Column="0" Grid.Row="0" Height="30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10*"/>
+                <ColumnDefinition Width="80*"/>
+                <ColumnDefinition Width="10*"/>
+            </Grid.ColumnDefinitions>
+            <Button Style="{DynamicResource SquareButtonStyle}" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0,0,0,0"
+                    Content="Open folder" BorderBrush="{x:Null}" Grid.Column="0" Click="OpenFolderButton_Click"></Button>
+            <Button Style="{DynamicResource SquareButtonStyle}" VerticalAlignment="Center" HorizontalAlignment="Stretch" Content="Settings"
+                    Margin="0,0,5,0" Grid.Column="2" BorderBrush="{x:Null}" Click="SettingsButton_Click"></Button>
+        </Grid>
+        <Grid Name="ImageGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0">
+            <Image Name="Picture" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseDown="Image_MouseDown">
+            </Image>
+        </Grid>
+        <Controls:Flyout Grid.Row="1" Grid.Column="1" Position="Right" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                        Width="300" Header="Settings" IsOpen="False" Name="SettingsFlyout">
+
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="SettingsGrid">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+                <Controls:ToggleSwitch Style="{StaticResource ResourceKey=FileModeSwitchStyle}" Name="FileModeSwitcher"></Controls:ToggleSwitch>
+                <Button Style="{StaticResource ResourceKey=AddKeyButtonStyle}" Click="AddKeyButton_Click"></Button>
+            </Grid>
+        </Controls:Flyout>
+    </Grid>
+</Controls:MetroWindow>

@@ -1,0 +1,83 @@
+﻿<Application x:Class="MahAppsMetroThemesSample.App"
+         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+         xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+         StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+
+                <!-- accent resource -->
+                <!-- change "Cobalt" to the accent color you want -->
+
+                <!-- theme resource -->
+                <!-- change "BaseLight" to the theme you want -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseDark.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style TargetType="{x:Type Controls:ToggleSwitch}" x:Key="FileModeSwitchStyle">
+                <Setter Property="OffLabel" Value="Copy"></Setter>
+                <Setter Property="IsChecked" Value="True"></Setter>
+                <Setter Property="OnLabel" Value="Move"></Setter>
+                <Setter Property="OnSwitchBrush" Value="#FF129DD9"></Setter>
+                <Setter Property="OffSwitchBrush" Value="#FF129DD9"></Setter>
+                <Setter Property="Width" Value="150"></Setter>
+                <Setter Property="VerticalAlignment" Value="Top"></Setter>
+                <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+                <Setter Property="Margin" Value="10,0,0,0"></Setter>
+                <Setter Property="Grid.Row" Value="0"></Setter>
+            </Style>
+
+            <Style TargetType="{x:Type Button}" x:Key="AddKeyButtonStyle" BasedOn="{StaticResource MetroFlatButton}">
+                <Setter Property="VerticalAlignment" Value="Top"></Setter>
+                <Setter Property="HorizontalAlignment" Value="Right"></Setter>
+                <Setter Property="Width" Value="75"></Setter>
+                <Setter Property="Height" Value="35"></Setter>
+                <Setter Property="Background" Value="{x:Null}"></Setter>
+                <Setter Property="Content" Value="Add key"></Setter>
+                <Setter Property="Foreground" Value="White"></Setter>
+                <Setter Property="Grid.Row" Value="0"></Setter>
+                <Setter Property="FontWeight" Value="SemiBold"></Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#FF3F3F46"></Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="{x:Type Button}" x:Key="DeleteKeyButtonStyle" x:Name="DeleteKeyButtonStyle"
+               BasedOn="{StaticResource MetroFlatButton}">
+                <Setter Property="Content" Value="Delete"></Setter>
+                <Setter Property="Background" Value="{x:Null}"></Setter>
+                <Setter Property="Foreground" Value="White"></Setter>
+                <Setter Property="VerticalAlignment" Value="Top"></Setter>
+                <Setter Property="HorizontalAlignment" Value="Right"></Setter>
+                <Setter Property="Margin" Value="0,14,0,0"></Setter>
+                <Setter Property="Height" Value="Auto"></Setter>
+            </Style>
+            <Style TargetType="{x:Type TextBox}" x:Key="KeyTextBoxStyle" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+                <Setter Property="VerticalAlignment" Value="Top"></Setter>
+                <Setter Property="Width" Value="40"></Setter>
+                <Setter Property="Height" Value="25"></Setter>
+                <Setter Property="Controls:TextBoxHelper.Watermark" Value="Key"></Setter>
+                <Setter Property="Margin" Value="10,15,0,0"></Setter>
+                <Setter Property="IsReadOnly" Value="True"></Setter>
+            </Style>
+            <Style TargetType="{x:Type TextBox}" x:Key="SubfolderNameTextBoxStyle" 
+               BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="Controls:TextBoxHelper.Watermark" Value="Subfolder name"></Setter>
+                <Setter Property="Controls:TextBoxHelper.ClearTextButton" Value="True"></Setter>
+                <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+                <Setter Property="VerticalAlignment" Value="Top"></Setter>
+                <Setter Property="Margin" Value="55,15,5,0"></Setter>
+                <Setter Property="Height" Value="25"></Setter>
+                <Setter Property="Width" Value="180"></Setter>
+            </Style>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
