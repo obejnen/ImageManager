@@ -24,6 +24,7 @@ namespace ImageManager
 
 		public MainWindow()
 		{
+
 			InitializeComponent();
 			LoadSettingsFromFile();
 			WindowButtonCommandsOverlayBehavior = WindowCommandsOverlayBehavior.Never;
@@ -33,37 +34,23 @@ namespace ImageManager
 		{
 			if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
 			{
-				if (!isFullScreenEnabled)
-					EnableFullScreen();
-				else
-					DisableFullScreen();
+				SetFullscreenSettings(!isFullScreenEnabled);
 			}
 		}
 
-		private void DisableFullScreen()
+		private void SetFullscreenSettings(bool fullscreen)
 		{
-			WindowStyle = WindowStyle.SingleBorderWindow;
-			IgnoreTaskbarOnMaximize = false;
-			ShowTitleBar = true;
-			ButtonsGrid.Height = 120;
-			isFullScreenEnabled = false;
-			ShowCloseButton = true;
-			ShowMinButton = true;
-			ShowMaxRestoreButton = true;
-			ResizeMode = ResizeMode.CanResize;
-		}
+			WindowStyle = fullscreen ? WindowStyle.None : WindowStyle.SingleBorderWindow;
+			ButtonsGrid.Visibility = fullscreen ? Visibility.Hidden : Visibility.Visible;
+			ResizeMode = fullscreen ? ResizeMode.NoResize : ResizeMode.CanResize;
+			WindowState = fullscreen ? WindowState.Maximized : WindowState.Normal;
 
-		private void EnableFullScreen()
-		{
-			WindowStyle = WindowStyle.None;
-			IgnoreTaskbarOnMaximize = true;
-			ShowTitleBar = false;
-			ButtonsGrid.Height = 0;
-			isFullScreenEnabled = true;
-			ShowCloseButton = false;
-			ShowMinButton = false;
-			ShowMaxRestoreButton = false;
-			ResizeMode = ResizeMode.NoResize;
+			IgnoreTaskbarOnMaximize = fullscreen;
+			ShowTitleBar = !fullscreen;
+			isFullScreenEnabled = fullscreen;
+			ShowCloseButton = !fullscreen;
+			ShowMinButton = !fullscreen;
+			ShowMaxRestoreButton = !fullscreen;
 		}
 
 		private void SaveSettings(object sender)
@@ -85,14 +72,9 @@ namespace ImageManager
 
 			using (Stream fStream = File.OpenRead("settings.dat"))
 			{
-				if (fStream.Length != 0)
-				{
-					settingsFromFile = (Settings)binFormat.Deserialize(fStream);
-				}
-				else
-				{
-					settingsFromFile = new Settings();
-				}
+				settingsFromFile = fStream.Length != 0 
+					? (Settings) binFormat.Deserialize(fStream) 
+					: new Settings();
 			}
 
 			SettingsManager.LoadSettings(controlPanels, settingsFromFile, CreateControlPanel);
@@ -273,22 +255,14 @@ namespace ImageManager
 			var txtBox = (TextBox)sender;
 			var key = e.Key.ToString();
 
-			if (txtBox.Text == String.Empty)
+			if (!keyManager.IsKeyUsed(key))
 			{
-				if (!keyManager.IsKeyUsed(key))
-				{
-					txtBox.Text = key;
-					keyManager.AddKey(key);
-				}
-			}
-			else
-			{
-				if (!keyManager.IsKeyUsed(key))
+				if (!string.IsNullOrEmpty(txtBox.Text))
 				{
 					keyManager.RemoveKey(txtBox.Text);
-					keyManager.AddKey(key);
-					txtBox.Text = key;
 				}
+				txtBox.Text = key;
+				keyManager.AddKey(key);
 			}
 		}
 
@@ -301,21 +275,15 @@ namespace ImageManager
 
 		private void SubfolderTextBox_TextChanged(object sender, RoutedEventArgs e)
 		{
-
 			var txtBox = (TextBox)sender;
-			var lastNameSymbol = txtBox.Name.Remove(0, txtBox.Name.Length - 1);
-			var index = Convert.ToInt32(lastNameSymbol);
-			string keyTextBoxContent = String.Empty;
 
-			foreach (ControlPanel cp in controlPanels)
+			var panel = controlPanels.SingleOrDefault(p => p.KeyTextBox.Name == txtBox.Name);
+
+			if (panel?.KeyTextBox.Text == String.Empty
+				&& txtBox.Text.Length == 1
+				&& !keyManager.IsKeyUsed(txtBox.Text))
 			{
-				if (cp.Index == index
-					&& cp.KeyTextBox.Text == String.Empty
-					&& txtBox.Text.Length == 1
-					&& !keyManager.IsKeyUsed(txtBox.Text))
-				{
-					cp.KeyTextBox.Text = txtBox.Text.ToUpper();
-				}
+				panel.KeyTextBox.Text = txtBox.Text.ToUpper();
 			}
 
 			SettingsManager.RefreshSettings(controlPanels, settings);
