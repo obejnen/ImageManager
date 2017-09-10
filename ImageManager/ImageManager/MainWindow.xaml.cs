@@ -11,6 +11,15 @@ using MahApps.Metro.Controls;
 namespace ImageManager
 {
 	public delegate void CreateControlPanelDelegate();
+
+	//todo: GLOBAL REVIEW move logics to managers
+	//todo: use Tasks/async/await 
+	//			to save settings
+	//			to move files
+	//			to reinit files list
+	//todo: show exceptions on UI / check if WPF have global exception handling
+	//todo: write UnitTests
+
 	public partial class MainWindow : MetroWindow
 	{
 		private const string SettingsFileName = "settings.dat";
@@ -63,7 +72,7 @@ namespace ImageManager
 			}
 		}
 
-		//todo: move method to settings manager
+		//todo: move method to settings manager (probably to constructor)
 		private void LoadSettingsFromFile()
 		{
 			BinaryFormatter binFormat = new BinaryFormatter();
@@ -135,6 +144,7 @@ namespace ImageManager
 
 			CreateFolder(directoryPath);
 
+			//todo: add error if file already exist
 			if (!File.Exists(Path.Combine(directoryPath, currentImage.Name)))
 			{
 				File.Copy(currentImage.FullPath, Path.Combine(directoryPath, currentImage.Name));
@@ -147,7 +157,7 @@ namespace ImageManager
 				//todo: send only path instead of full image
 				var nextImage = fileManager.GetNextImagePath(currentImage);
 
-				//todo: review this change
+				//todo: review this code
 				//var nextImagePath = allImagesPath.Count != 0 ?
 				//	allImagesPath[nextImageIndex] :
 				//	null;
@@ -254,6 +264,7 @@ namespace ImageManager
 			var txtBox = (TextBox)sender;
 			var key = e.Key.ToString();
 
+			//todo: move logic to key manager
 			if (!keyManager.IsKeyUsed(key))
 			{
 				if (!string.IsNullOrEmpty(txtBox.Text))

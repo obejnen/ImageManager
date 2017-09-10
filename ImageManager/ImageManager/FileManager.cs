@@ -34,8 +34,8 @@ namespace ImageManager
 			int currentImageIndex = allImagesPath.IndexOf(currentImage.FullPath);
 
 			return currentImageIndex == allImagesPath.Count - 1 
-				? allImagesPath[0]
-				: allImagesPath[++currentImageIndex];
+				? allImagesPath.First()
+				: allImagesPath[currentImageIndex + 1];
 		}
 
 		public string GetPreviousImagePath(Image currentImage)
