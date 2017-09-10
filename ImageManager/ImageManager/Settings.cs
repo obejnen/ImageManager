@@ -3,9 +3,20 @@ using System.Collections.Generic;
 
 namespace ImageManager
 {
+	class Setting
+	{
+		public string DirectoryName;
+		public string Key;
+		public bool Copy;
+	}
+
 	[Serializable]
 	class Settings
 	{
+		//todo: use alsettings instead of DirectoryNames and Keys
+		public List<Setting> AllSettings;
+
+		//todo: remove
 		public List<string> DirectoryNames;
 		public List<string> Keys;
 
@@ -18,13 +29,13 @@ namespace ImageManager
 
 	static class SettingsManager
 	{
-		public static void RefreshSettings(List<ControlPanel> controlPanels, Settings settings)
+		public static void RefreshSettings(List<ButtonBindingControl> controlPanels, Settings settings)
 		{
 			settings.DirectoryNames.Clear();
 			settings.Keys.Clear();
 			string dnContent = String.Empty;
 			string kContent = String.Empty;
-			foreach (ControlPanel cp in controlPanels)
+			foreach (ButtonBindingControl cp in controlPanels)
 			{
 				dnContent = cp.SubfolderTextBox.Text;
 				kContent = cp.KeyTextBox.Text;
@@ -36,7 +47,7 @@ namespace ImageManager
 			}
 		}
 
-		public static void LoadSettings(List<ControlPanel> controlPanels, Settings settings, CreateControlPanelDelegate CreateCP)
+		public static void LoadSettings(List<ButtonBindingControl> controlPanels, Settings settings, CreateControlPanelDelegate CreateCP)
 		{
 			controlPanels.Clear();
 

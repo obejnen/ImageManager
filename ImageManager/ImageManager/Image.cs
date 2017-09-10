@@ -4,7 +4,7 @@ using System.IO;
 
 namespace ImageManager
 {
-	class Image
+	internal class Image
 	{
 		private BitmapImage _img;
 
