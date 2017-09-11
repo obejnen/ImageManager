@@ -1,25 +1,50 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace ImageManager
 {
-	static class FileManager
+	internal class FileManager
 	{
-		public static int GetNextImageIndex(List<string> allImagesPath, Image currentImage)
+		private List<string> allImagesPath;
+
+		public void RemoveImage(string path)
+		{
+			allImagesPath.Remove(path);
+		}
+
+		public string LoadDirectory(string path)
+		{
+			if (path == String.Empty)
+				return null;
+
+			allImagesPath = Directory.GetFiles(path).ToList();
+
+			return allImagesPath?.FirstOrDefault();
+		}
+
+		public void SetImagesPath(List<string> pathList)
+		{
+			allImagesPath = pathList;
+		}
+
+		public string GetNextImagePath(Image currentImage)
 		{
 			int currentImageIndex = allImagesPath.IndexOf(currentImage.FullPath);
 
-			if (currentImageIndex == allImagesPath.Count - 1)
-				return 0;
-			return ++currentImageIndex;
+			return currentImageIndex == allImagesPath.Count - 1 
+				? allImagesPath.First()
+				: allImagesPath[currentImageIndex + 1];
 		}
 
-		public static int GetPreviousImageIndex(List<string> allImagePath, Image currentImage)
+		public string GetPreviousImagePath(Image currentImage)
 		{
-			int currentImageIndex = allImagePath.IndexOf(currentImage.FullPath);
+			int currentImageIndex = allImagesPath.IndexOf(currentImage.FullPath);
 
-			if (currentImageIndex != 0)
-				return --currentImageIndex;
-			return allImagePath.Count - 1;
+			return currentImageIndex != 0 
+				? allImagesPath[--currentImageIndex] 
+				: allImagesPath[allImagesPath.Count - 1];
 		}
 	}
 }

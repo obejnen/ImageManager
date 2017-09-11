@@ -11,19 +11,29 @@ using MahApps.Metro.Controls;
 namespace ImageManager
 {
 	public delegate void CreateControlPanelDelegate();
+
+	//todo: GLOBAL REVIEW move logics to managers
+	//todo: use Tasks/async/await 
+	//			to save settings
+	//			to move files
+	//			to reinit files list
+	//todo: show exceptions on UI / check if WPF have global exception handling
+	//todo: write UnitTests
+
 	public partial class MainWindow : MetroWindow
 	{
+		private const string SettingsFileName = "settings.dat";
 
 		private Image currentImage;
-		private List<string> allImagesPath;
+		private FileManager fileManager = new FileManager();
 		private KeyManager keyManager = new KeyManager();
 		private Settings settings = new Settings();
-		private List<ControlPanel> controlPanels = new List<ControlPanel>();
+		private List<ButtonBindingControl> controlPanels = new List<ButtonBindingControl>();
 		private bool isFullScreenEnabled = false;
-
 
 		public MainWindow()
 		{
+
 			InitializeComponent();
 			LoadSettingsFromFile();
 			WindowButtonCommandsOverlayBehavior = WindowCommandsOverlayBehavior.Never;
@@ -33,66 +43,49 @@ namespace ImageManager
 		{
 			if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
 			{
-				if (!isFullScreenEnabled)
-					EnableFullScreen();
-				else
-					DisableFullScreen();
+				SetFullscreenSettings(!isFullScreenEnabled);
 			}
 		}
 
-		private void DisableFullScreen()
+		private void SetFullscreenSettings(bool fullscreen)
 		{
-			WindowStyle = WindowStyle.SingleBorderWindow;
-			IgnoreTaskbarOnMaximize = false;
-			ShowTitleBar = true;
-			ButtonsGrid.Height = 120;
-			isFullScreenEnabled = false;
-			ShowCloseButton = true;
-			ShowMinButton = true;
-			ShowMaxRestoreButton = true;
-			ResizeMode = ResizeMode.CanResize;
+			WindowStyle = fullscreen ? WindowStyle.None : WindowStyle.SingleBorderWindow;
+			ButtonsGrid.Visibility = fullscreen ? Visibility.Hidden : Visibility.Visible;
+			ResizeMode = fullscreen ? ResizeMode.NoResize : ResizeMode.CanResize;
+			WindowState = fullscreen ? WindowState.Maximized : WindowState.Normal;
+
+			IgnoreTaskbarOnMaximize = fullscreen;
+			ShowTitleBar = !fullscreen;
+			isFullScreenEnabled = fullscreen;
+			ShowCloseButton = !fullscreen;
+			ShowMinButton = !fullscreen;
+			ShowMaxRestoreButton = !fullscreen;
 		}
 
-		private void EnableFullScreen()
-		{
-			WindowStyle = WindowStyle.None;
-			IgnoreTaskbarOnMaximize = true;
-			ShowTitleBar = false;
-			ButtonsGrid.Height = 0;
-			isFullScreenEnabled = true;
-			ShowCloseButton = false;
-			ShowMinButton = false;
-			ShowMaxRestoreButton = false;
-			ResizeMode = ResizeMode.NoResize;
-		}
-
+		//todo: move method to settings manager
 		private void SaveSettings(object sender)
 		{
 			BinaryFormatter binFormat = new BinaryFormatter();
-			using (Stream fStream = new FileStream("settings.dat", FileMode.Create, FileAccess.Write, FileShare.None))
+			using (Stream fStream = new FileStream(SettingsFileName, FileMode.Create, FileAccess.Write, FileShare.None))
 			{
 				binFormat.Serialize(fStream, sender);
 			}
 		}
 
+		//todo: move method to settings manager (probably to constructor)
 		private void LoadSettingsFromFile()
 		{
 			BinaryFormatter binFormat = new BinaryFormatter();
 			Settings settingsFromFile;
 
-			if (!File.Exists("settings.dat"))
+			if (!File.Exists(SettingsFileName))
 				return;
 
-			using (Stream fStream = File.OpenRead("settings.dat"))
+			using (Stream fStream = File.OpenRead(SettingsFileName))
 			{
-				if (fStream.Length != 0)
-				{
-					settingsFromFile = (Settings)binFormat.Deserialize(fStream);
-				}
-				else
-				{
-					settingsFromFile = new Settings();
-				}
+				settingsFromFile = fStream.Length != 0 
+					? (Settings) binFormat.Deserialize(fStream) 
+					: new Settings();
 			}
 
 			SettingsManager.LoadSettings(controlPanels, settingsFromFile, CreateControlPanel);
@@ -100,7 +93,7 @@ namespace ImageManager
 
 		private void AddControlHeadPanel()
 		{
-			var stackPanel = ControlPanel.CreateHeaderStackPanel(AddKeyButton_Click);
+			var stackPanel = ButtonBindingControl.CreateHeaderStackPanel(AddKeyButton_Click);
 			var rd = new RowDefinition
 			{
 				Height = new GridLength(30, GridUnitType.Pixel)
@@ -151,21 +144,25 @@ namespace ImageManager
 
 			CreateFolder(directoryPath);
 
+			//todo: add error if file already exist
 			if (!File.Exists(Path.Combine(directoryPath, currentImage.Name)))
 			{
 				File.Copy(currentImage.FullPath, Path.Combine(directoryPath, currentImage.Name));
 			}
 			if (FileModeSwitcher.IsChecked == true)
 			{
-				var currentImagePath = currentImage.FullPath;
-				allImagesPath.Remove(currentImagePath);
+				string currentImagePath = currentImage.FullPath;
+				fileManager.RemoveImage(currentImagePath);
 
-				var nextImageIndex = FileManager.GetNextImageIndex(allImagesPath, currentImage);
-				var nextImagePath = allImagesPath.Count != 0 ?
-					allImagesPath[nextImageIndex] :
-					null;
+				//todo: send only path instead of full image
+				var nextImage = fileManager.GetNextImagePath(currentImage);
 
-				ShowImage(nextImagePath);
+				//todo: review this code
+				//var nextImagePath = allImagesPath.Count != 0 ?
+				//	allImagesPath[nextImageIndex] :
+				//	null;
+
+				ShowImage(nextImage);
 				File.Delete(currentImagePath);
 			}
 
@@ -178,15 +175,15 @@ namespace ImageManager
 			grid.ColumnDefinitions.Clear();
 		}
 
-		private void AddControlPanelToGrid(List<ControlPanel> controlPanels)
+		private void AddControlPanelToGrid(List<ButtonBindingControl> controlPanels)
 		{
-			foreach (ControlPanel cp in controlPanels)
+			foreach (ButtonBindingControl cp in controlPanels)
 			{
 				AddControlPanelToGrid(cp);
 			}
 		}
 
-		private void AddControlPanelToGrid(ControlPanel cp)
+		private void AddControlPanelToGrid(ButtonBindingControl cp)
 		{
 			SettingsGrid.RowDefinitions.Add(cp.ControlRow);
 			SettingsGrid.Children.Add(cp.ControlStackPanel);
@@ -200,7 +197,7 @@ namespace ImageManager
 			if (controlPanels.Count >= 8)
 				return;
 
-			var cp = new ControlPanel(controlPanels.Count + 1);
+			var cp = new ButtonBindingControl(controlPanels.Count + 1);
 
 			cp.KeyTextBox.PreviewKeyDown += Controls_KeyDown;
 			cp.DeleteKeyButton.Click += DeleteKeyButton_Click;
@@ -228,15 +225,9 @@ namespace ImageManager
 
 		private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
 		{
-			string directoryPath = ShowSelectFolderDialog();
-			if (directoryPath != String.Empty)
-			{
-				allImagesPath = Directory.GetFiles(directoryPath).ToList();
-				if (allImagesPath.Count != 0)
-				{
-					ShowImage(allImagesPath[0]);
-				}
-			}
+			var path = ShowSelectFolderDialog();
+			var firstImage = fileManager.LoadDirectory(path);
+			ShowImage(firstImage);
 		}
 
 		private void MainWindow_KeyDown(object sender, KeyEventArgs e)
@@ -245,20 +236,20 @@ namespace ImageManager
 			{
 				if (e.Key == Key.Right || e.Key == Key.Space)
 				{
-					var nextImageIndex = FileManager.GetNextImageIndex(allImagesPath, currentImage);
-					ShowImage(allImagesPath[nextImageIndex]);
+					var nextImage = fileManager.GetNextImagePath(currentImage);
+					ShowImage(nextImage);
 					return;
 				}
 				if (e.Key == Key.Left || e.Key == Key.Back)
 				{
-					var previousImageIndex = FileManager.GetPreviousImageIndex(allImagesPath, currentImage);
-					ShowImage(allImagesPath[previousImageIndex]);
+					//todo: send only path instead of full image
+					var previousImage = fileManager.GetPreviousImagePath(currentImage);
+					ShowImage(previousImage);
 					return;
 				}
 				if (keyManager.IsKeyUsed(e.Key.ToString()))
 				{
-					var index = ControlPanel.GetControlPanelIndex(controlPanels, e.Key.ToString());
-					var subfolderName = ControlPanel.GetSubfolderName(controlPanels, index);
+					var subfolderName = ButtonBindingControl.GetSubfolderName(controlPanels, e.Key.ToString());
 					var imageDirectoryName = Path.GetDirectoryName(currentImage.FullPath);
 					var newImagePath = Path.Combine(imageDirectoryName, subfolderName);
 
@@ -273,22 +264,15 @@ namespace ImageManager
 			var txtBox = (TextBox)sender;
 			var key = e.Key.ToString();
 
-			if (txtBox.Text == String.Empty)
+			//todo: move logic to key manager
+			if (!keyManager.IsKeyUsed(key))
 			{
-				if (!keyManager.IsKeyUsed(key))
-				{
-					txtBox.Text = key;
-					keyManager.AddKey(key);
-				}
-			}
-			else
-			{
-				if (!keyManager.IsKeyUsed(key))
+				if (!string.IsNullOrEmpty(txtBox.Text))
 				{
 					keyManager.RemoveKey(txtBox.Text);
-					keyManager.AddKey(key);
-					txtBox.Text = key;
 				}
+				txtBox.Text = key;
+				keyManager.AddKey(key);
 			}
 		}
 
@@ -301,21 +285,15 @@ namespace ImageManager
 
 		private void SubfolderTextBox_TextChanged(object sender, RoutedEventArgs e)
 		{
-
 			var txtBox = (TextBox)sender;
-			var lastNameSymbol = txtBox.Name.Remove(0, txtBox.Name.Length - 1);
-			var index = Convert.ToInt32(lastNameSymbol);
-			string keyTextBoxContent = String.Empty;
 
-			foreach (ControlPanel cp in controlPanels)
+			var panel = controlPanels.SingleOrDefault(p => p.KeyTextBox.Name == txtBox.Name);
+
+			if (panel?.KeyTextBox.Text == String.Empty
+				&& txtBox.Text.Length == 1
+				&& !keyManager.IsKeyUsed(txtBox.Text))
 			{
-				if (cp.Index == index
-					&& cp.KeyTextBox.Text == String.Empty
-					&& txtBox.Text.Length == 1
-					&& !keyManager.IsKeyUsed(txtBox.Text))
-				{
-					cp.KeyTextBox.Text = txtBox.Text.ToUpper();
-				}
+				panel.KeyTextBox.Text = txtBox.Text.ToUpper();
 			}
 
 			SettingsManager.RefreshSettings(controlPanels, settings);
@@ -325,12 +303,12 @@ namespace ImageManager
 		private void DeleteKeyButton_Click(object sender, RoutedEventArgs e)
 		{
 			var button = (Button)sender;
-			var index = ControlPanel.GetIndex(button);
+			var index = ButtonBindingControl.GetIndex(button);
 			ClearGrid(SettingsGrid);
 			AddControlHeadPanel();
-			var cpToDelete = ControlPanel.GetControlPanel(controlPanels, index);
+			var cpToDelete = ButtonBindingControl.GetControlPanel(controlPanels, index);
 			controlPanels.Remove(cpToDelete);
-			ControlPanel.ChangeIndex(controlPanels);
+			ButtonBindingControl.ChangeIndex(controlPanels);
 			AddControlPanelToGrid(controlPanels);
 			SettingsManager.RefreshSettings(controlPanels, settings);
 			SaveSettings(settings);

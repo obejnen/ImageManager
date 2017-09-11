@@ -61,6 +61,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ButtonSettingsPanel.cs" />
     <Compile Include="Settings.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -70,7 +71,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ControlPanel.cs" />
+    <Compile Include="ButtonBindingControl.cs" />
     <Compile Include="FileManager.cs" />
     <Compile Include="Image.cs" />
     <Compile Include="KeyManager.cs" />

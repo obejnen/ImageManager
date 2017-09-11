@@ -4,25 +4,17 @@ using System.IO;
 
 namespace ImageManager
 {
-	class Image
+	internal class Image
 	{
-		public BitmapImage Img { get => _img; }
 		private BitmapImage _img;
 
-		public string FullPath
-		{
-			get => _img?.UriSource.LocalPath.ToString();
-		}
+		public BitmapImage Img => _img;
 
-		public string Name
-		{
-			get
-			{
-				return File.Exists(FullPath) ?
-					Path.GetFileName(FullPath) :
-					null;
-			}
-		}
+		public string FullPath => _img?.UriSource.LocalPath;
+
+		public string Name => File.Exists(FullPath)
+			? Path.GetFileName(FullPath)
+			: null;
 
 		public Image(string path)
 		{

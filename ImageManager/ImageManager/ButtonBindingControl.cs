@@ -6,7 +6,7 @@ using MahApps.Metro.Controls;
 
 namespace ImageManager
 {
-	class ControlPanel
+	public class ButtonBindingControl
 	{
 		const string DELETE_KEY_BUTTON_NAME = "DeleteKeyButton{0}";
 		const string KEY_TEXTBOX_NAME = "KeyTextBox{0}";
@@ -32,7 +32,7 @@ namespace ImageManager
 			AddKey, DeleteKey
 		}
 
-		public ControlPanel(int index)
+		public ButtonBindingControl(int index)
 		{
 			Index = index;
 			DeleteKeyButton = CreateButton(ButtonType.DeleteKey);
@@ -52,9 +52,9 @@ namespace ImageManager
 			return index;
 		}
 
-		public static ControlPanel GetControlPanel(List<ControlPanel> controlPanels, int index)
+		public static ButtonBindingControl GetControlPanel(List<ButtonBindingControl> controlPanels, int index)
 		{
-			foreach (ControlPanel cp in controlPanels)
+			foreach (ButtonBindingControl cp in controlPanels)
 			{
 				if (cp.Index == index)
 					return cp;
@@ -65,7 +65,7 @@ namespace ImageManager
 
 		public static StackPanel CreateHeaderStackPanel(RoutedEventHandler dlg)
 		{
-			ControlPanel cp = new ControlPanel(0);
+			ButtonBindingControl cp = new ButtonBindingControl(0);
 			var stackPanel = new StackPanel();
 			Grid.SetRow(stackPanel, 0);
 			var button = cp.CreateButton(ButtonType.AddKey);
@@ -91,10 +91,10 @@ namespace ImageManager
 		}
 
 
-		public static void ChangeIndex(List<ControlPanel> controlPanels)
+		public static void ChangeIndex(List<ButtonBindingControl> controlPanels)
 		{
 			var index = 1;
-			foreach (ControlPanel cp in controlPanels)
+			foreach (ButtonBindingControl cp in controlPanels)
 			{
 				cp.Index = index;
 				cp.KeyTextBox.Name = String.Format(KEY_TEXTBOX_NAME, index);
@@ -116,29 +116,32 @@ namespace ImageManager
 			ControlStackPanel.Children.Add(ControlGrid);
 		}
 
-		public static string GetSubfolderName(List<ControlPanel> controlPanels, int index)
+		////todo: move one level outside - to ButtonBindingControl
+		//public static string GetSubfolderName(List<ButtonBindingControl> controlPanels, int index)
+		//{
+
+		//	foreach (ButtonBindingControl cp in controlPanels)
+		//	{
+		//		if (cp.Index == index)
+		//		{
+		//			return cp.SubfolderTextBox.Text;
+		//		}
+		//	}
+		//	return String.Empty;
+		//}
+
+		//todo: move one level outside - to ButtonBindingControl
+		public static string GetSubfolderName(List<ButtonBindingControl> controlPanels, string key)
 		{
-			foreach (ControlPanel cp in controlPanels)
+			foreach (ButtonBindingControl cp in controlPanels)
 			{
-				if (cp.Index == index)
+				if (cp.KeyTextBox.Text == key)
 				{
 					return cp.SubfolderTextBox.Text;
 				}
 			}
+
 			return String.Empty;
-		}
-
-		public static int GetControlPanelIndex(List<ControlPanel> controlPanels, string key)
-		{
-			foreach (ControlPanel cp in controlPanels)
-			{
-				if (cp.KeyTextBox.Text == key)
-				{
-					return cp.Index;
-				}
-			}
-
-			return 0;
 		}
 
 		private void FillGrid()
