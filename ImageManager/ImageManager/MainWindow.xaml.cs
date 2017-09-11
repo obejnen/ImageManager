@@ -7,10 +7,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using MahApps.Metro.Controls;
+using ImageManager.ButtonBinding;
 
 namespace ImageManager
 {
-	public delegate void CreateControlPanelDelegate();
 
 	//todo: GLOBAL REVIEW move logics to managers
 	//todo: use Tasks/async/await 
@@ -27,15 +27,14 @@ namespace ImageManager
 		private Image currentImage;
 		private FileManager fileManager = new FileManager();
 		private KeyManager keyManager = new KeyManager();
-		private Settings settings = new Settings();
-		private List<ButtonBindingControl> controlPanels = new List<ButtonBindingControl>();
+		//private Settings settings = new Settings();
+        private ControlLinesManager controlLinesManager = new ControlLinesManager();
 		private bool isFullScreenEnabled = false;
 
 		public MainWindow()
 		{
-
 			InitializeComponent();
-			LoadSettingsFromFile();
+			//LoadSettingsFromFile();
 			WindowButtonCommandsOverlayBehavior = WindowCommandsOverlayBehavior.Never;
 		}
 
@@ -45,6 +44,11 @@ namespace ImageManager
 			{
 				SetFullscreenSettings(!isFullScreenEnabled);
 			}
+		}
+
+		private void FullScreenButton_Click(object sender, RoutedEventArgs e)
+		{
+			SetFullscreenSettings(!isFullScreenEnabled);
 		}
 
 		private void SetFullscreenSettings(bool fullscreen)
@@ -63,46 +67,48 @@ namespace ImageManager
 		}
 
 		//todo: move method to settings manager
-		private void SaveSettings(object sender)
-		{
-			BinaryFormatter binFormat = new BinaryFormatter();
-			using (Stream fStream = new FileStream(SettingsFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-			{
-				binFormat.Serialize(fStream, sender);
-			}
-		}
+		//private void SaveSettings(object sender)
+		//{
+		//	BinaryFormatter binFormat = new BinaryFormatter();
+		//	using (Stream fStream = new FileStream(SettingsFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+		//	{
+		//		binFormat.Serialize(fStream, sender);
+		//	}
+		//}
 
 		//todo: move method to settings manager (probably to constructor)
-		private void LoadSettingsFromFile()
-		{
-			BinaryFormatter binFormat = new BinaryFormatter();
-			Settings settingsFromFile;
+		//private void LoadSettingsFromFile()
+		//{
+		//	BinaryFormatter binFormat = new BinaryFormatter();
+		//	Settings settingsFromFile;
 
-			if (!File.Exists(SettingsFileName))
-				return;
+		//	if (!File.Exists(SettingsFileName))
+		//		return;
 
-			using (Stream fStream = File.OpenRead(SettingsFileName))
-			{
-				settingsFromFile = fStream.Length != 0 
-					? (Settings) binFormat.Deserialize(fStream) 
-					: new Settings();
-			}
+		//	using (Stream fStream = File.OpenRead(SettingsFileName))
+		//	{
+		//		settingsFromFile = fStream.Length != 0 
+		//			? (Settings) binFormat.Deserialize(fStream) 
+		//			: new Settings();
+		//	}
 
-			SettingsManager.LoadSettings(controlPanels, settingsFromFile, CreateControlPanel);
-		}
+		//	SettingsManager.LoadSettings(controlPanels, settingsFromFile, CreateControlPanel);
+		//}
 
-		private void AddControlHeadPanel()
-		{
-			var stackPanel = ButtonBindingControl.CreateHeaderStackPanel(AddKeyButton_Click);
-			var rd = new RowDefinition
-			{
-				Height = new GridLength(30, GridUnitType.Pixel)
-			};
-			SettingsGrid.RowDefinitions.Add(rd);
-			SettingsGrid.Children.Add(stackPanel);
-		}
+        private string ShowSelectImageDialog()
+        {
+            var dlg = new System.Windows.Forms.OpenFileDialog();
 
-		private string ShowSelectFolderDialog()
+            dlg.Filter = "Jpg images |*.jpg|Png images|*.png|All files|*.*";
+            if(dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                return dlg.FileName;
+            }
+
+            return String.Empty;
+        }
+
+        private string ShowSelectFolderDialog()
 		{
 			var selectedPath = string.Empty;
 
@@ -129,93 +135,12 @@ namespace ImageManager
 				Picture.Source = null;
 		}
 
-		private void CreateFolder(string path)
-		{
-			if (!Directory.Exists(path))
-			{
-				Directory.CreateDirectory(path);
-			}
-		}
-
-		private void MoveImage(string directoryPath)
-		{
-			if (Picture.Source == null)
-				return;
-
-			CreateFolder(directoryPath);
-
-			//todo: add error if file already exist
-			if (!File.Exists(Path.Combine(directoryPath, currentImage.Name)))
-			{
-				File.Copy(currentImage.FullPath, Path.Combine(directoryPath, currentImage.Name));
-			}
-			if (FileModeSwitcher.IsChecked == true)
-			{
-				string currentImagePath = currentImage.FullPath;
-				fileManager.RemoveImage(currentImagePath);
-
-				//todo: send only path instead of full image
-				var nextImage = fileManager.GetNextImagePath(currentImage);
-
-				//todo: review this code
-				//var nextImagePath = allImagesPath.Count != 0 ?
-				//	allImagesPath[nextImageIndex] :
-				//	null;
-
-				ShowImage(nextImage);
-				File.Delete(currentImagePath);
-			}
-
-		}
-
-		private void ClearGrid(Grid grid)
-		{
-			grid.Children.Clear();
-			grid.RowDefinitions.Clear();
-			grid.ColumnDefinitions.Clear();
-		}
-
-		private void AddControlPanelToGrid(List<ButtonBindingControl> controlPanels)
-		{
-			foreach (ButtonBindingControl cp in controlPanels)
-			{
-				AddControlPanelToGrid(cp);
-			}
-		}
-
-		private void AddControlPanelToGrid(ButtonBindingControl cp)
-		{
-			SettingsGrid.RowDefinitions.Add(cp.ControlRow);
-			SettingsGrid.Children.Add(cp.ControlStackPanel);
-
-			SettingsManager.RefreshSettings(controlPanels, settings);
-			SaveSettings(settings);
-		}
-
-		private void CreateControlPanel()
-		{
-			if (controlPanels.Count >= 8)
-				return;
-
-			var cp = new ButtonBindingControl(controlPanels.Count + 1);
-
-			cp.KeyTextBox.PreviewKeyDown += Controls_KeyDown;
-			cp.DeleteKeyButton.Click += DeleteKeyButton_Click;
-			cp.SubfolderTextBox.TextChanged += SubfolderTextBox_TextChanged;
-			cp.KeyTextBox.TextChanged += KeyTextBox_TextChanged;
-
-			AddControlPanelToGrid(cp);
-			controlPanels.Add(cp);
-
-			SettingsManager.RefreshSettings(controlPanels, settings);
-			SaveSettings(settings);
-		}
-
+		#region EventsHandlers
 		private void AddKeyButton_Click(object sender, RoutedEventArgs e)
 		{
-			CreateControlPanel();
-			SettingsManager.RefreshSettings(controlPanels, settings);
-			SaveSettings(settings);
+			//CreateControlPanel();
+			controlLinesManager.AddControlLine(SettingsGrid, DeleteKeyButton_Click, SubfolderTextBox_TextChanged,
+				KeyTextBox_TextChanged, Controls_KeyDown);
 		}
 
 		private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -230,32 +155,51 @@ namespace ImageManager
 			ShowImage(firstImage);
 		}
 
+
+        private void OpenFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var path = ShowSelectImageDialog();
+            fileManager.LoadDirectory(Path.GetDirectoryName(path));
+            ShowImage(path);
+        }
+
 		private void MainWindow_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (SettingsFlyout.IsOpen != true && currentImage != null)
+			if (SettingsFlyout.IsOpen != true && currentImage != null && Picture.Source != null)
 			{
+				string key = e.Key.ToString();
 				if (e.Key == Key.Right || e.Key == Key.Space)
 				{
-					var nextImage = fileManager.GetNextImagePath(currentImage);
+					var nextImage = fileManager.GetNextImagePath(currentImage.FullPath);
 					ShowImage(nextImage);
 					return;
 				}
 				if (e.Key == Key.Left || e.Key == Key.Back)
 				{
 					//todo: send only path instead of full image
-					var previousImage = fileManager.GetPreviousImagePath(currentImage);
+					var previousImage = fileManager.GetPreviousImagePath(currentImage.FullPath);
 					ShowImage(previousImage);
 					return;
 				}
-				if (keyManager.IsKeyUsed(e.Key.ToString()))
+				if (!keyManager.IsKeyAvaivable(e.Key.ToString()))
 				{
-					var subfolderName = ButtonBindingControl.GetSubfolderName(controlPanels, e.Key.ToString());
+					var subfolderName = controlLinesManager.GetSubfolderName(e.Key.ToString());
 					var imageDirectoryName = Path.GetDirectoryName(currentImage.FullPath);
 					var newImagePath = Path.Combine(imageDirectoryName, subfolderName);
 
-					CreateFolder(newImagePath);
-					MoveImage(newImagePath);
-				}
+                    fileManager.CreateFolder(newImagePath);
+                    var nextImage = fileManager.GetNextImagePath(currentImage.FullPath);
+                    ShowImage(nextImage);
+
+                    if(controlLinesManager.GetFileMode(key) == ButtonBinding.FileMode.Move)
+					{ 
+                        fileManager.MoveImage(currentImage.FullPath, newImagePath);
+                    }
+                    else
+                    {
+                        fileManager.CopyImage(currentImage.FullPath, newImagePath);
+                    }
+                }
 			}
 		}
 
@@ -264,54 +208,38 @@ namespace ImageManager
 			var txtBox = (TextBox)sender;
 			var key = e.Key.ToString();
 
-			//todo: move logic to key manager
-			if (!keyManager.IsKeyUsed(key))
+			if(keyManager.AddKey(key) == KeyManager.KeyChangeStatus.ChangedSuccessfully)
 			{
-				if (!string.IsNullOrEmpty(txtBox.Text))
-				{
-					keyManager.RemoveKey(txtBox.Text);
-				}
+				keyManager.RemoveKey(txtBox.Text);
 				txtBox.Text = key;
-				keyManager.AddKey(key);
 			}
 		}
 
 		private void KeyTextBox_TextChanged(object sender, RoutedEventArgs e)
 		{
 			var txtBox = (TextBox)sender;
-			if (!keyManager.IsKeyUsed(txtBox.Text))
+			if (keyManager.IsKeyAvaivable(txtBox.Text))
+			{
 				keyManager.AddKey(txtBox.Text);
+			}
 		}
 
 		private void SubfolderTextBox_TextChanged(object sender, RoutedEventArgs e)
 		{
 			var txtBox = (TextBox)sender;
 
-			var panel = controlPanels.SingleOrDefault(p => p.KeyTextBox.Name == txtBox.Name);
-
-			if (panel?.KeyTextBox.Text == String.Empty
-				&& txtBox.Text.Length == 1
-				&& !keyManager.IsKeyUsed(txtBox.Text))
+			if (txtBox.Text.Length == 1 && keyManager.IsKeyAvaivable(txtBox.Text))
 			{
-				panel.KeyTextBox.Text = txtBox.Text.ToUpper();
+				controlLinesManager.BindKeyFromTextBox(txtBox);
 			}
-
-			SettingsManager.RefreshSettings(controlPanels, settings);
-			SaveSettings(settings);
 		}
 
 		private void DeleteKeyButton_Click(object sender, RoutedEventArgs e)
 		{
-			var button = (Button)sender;
-			var index = ButtonBindingControl.GetIndex(button);
-			ClearGrid(SettingsGrid);
-			AddControlHeadPanel();
-			var cpToDelete = ButtonBindingControl.GetControlPanel(controlPanels, index);
-			controlPanels.Remove(cpToDelete);
-			ButtonBindingControl.ChangeIndex(controlPanels);
-			AddControlPanelToGrid(controlPanels);
-			SettingsManager.RefreshSettings(controlPanels, settings);
-			SaveSettings(settings);
+			var btn = (Button)sender;
+			keyManager.RemoveKey(controlLinesManager.GetBindedKey(btn));
+            controlLinesManager.RemoveControlLine(btn, SettingsGrid);
 		}
 	}
 }
+#endregion

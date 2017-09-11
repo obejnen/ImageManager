@@ -14,7 +14,36 @@ namespace ImageManager
 			allImagesPath.Remove(path);
 		}
 
-		public string LoadDirectory(string path)
+        public void CreateFolder(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+        }
+
+        public void CopyImage(string imgFullPath, string directoryPath)
+        {
+            var newImgPath = Path.Combine(directoryPath, Path.GetFileName(imgFullPath));
+
+            if(!File.Exists(newImgPath))
+            {
+                File.Copy(imgFullPath, newImgPath);
+            }
+        }
+
+        public void MoveImage(string imgFullPath, string directoryPath)
+        {
+            var newImgPath = Path.Combine(directoryPath, Path.GetFileName(imgFullPath));
+            //todo: add error if file already exist
+            if (!File.Exists(newImgPath))
+            {
+                File.Move(imgFullPath, newImgPath);
+                RemoveImage(imgFullPath);
+            }
+        }
+
+        public string LoadDirectory(string path)
 		{
 			if (path == String.Empty)
 				return null;
@@ -29,18 +58,18 @@ namespace ImageManager
 			allImagesPath = pathList;
 		}
 
-		public string GetNextImagePath(Image currentImage)
+		public string GetNextImagePath(string currentImagePath)
 		{
-			int currentImageIndex = allImagesPath.IndexOf(currentImage.FullPath);
+			int currentImageIndex = allImagesPath.IndexOf(currentImagePath);
 
 			return currentImageIndex == allImagesPath.Count - 1 
 				? allImagesPath.First()
 				: allImagesPath[currentImageIndex + 1];
 		}
 
-		public string GetPreviousImagePath(Image currentImage)
+		public string GetPreviousImagePath(string currentImagePath)
 		{
-			int currentImageIndex = allImagesPath.IndexOf(currentImage.FullPath);
+			int currentImageIndex = allImagesPath.IndexOf(currentImagePath);
 
 			return currentImageIndex != 0 
 				? allImagesPath[--currentImageIndex] 

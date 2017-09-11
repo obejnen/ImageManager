@@ -15,28 +15,38 @@
                       WindowStartupLocation="CenterOwner"
                       PreviewKeyDown="MainWindow_KeyDown"
                       ShowTitleBar="True">
+    <Controls:MetroWindow.Resources>
+        
+    </Controls:MetroWindow.Resources>
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
             <Controls:Flyout Grid.Row="1" Grid.Column="1" Position="Right" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                        Width="300" Header="Settings" IsOpen="False" Name="SettingsFlyout" Background="#FF1F1F1F">
-
-                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="SettingsGrid">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="30"/>
-                    </Grid.RowDefinitions>
-                    <Controls:ToggleSwitch Style="{StaticResource ResourceKey=FileModeSwitchStyle}" Name="FileModeSwitcher"></Controls:ToggleSwitch>
-                    <Button Style="{StaticResource ResourceKey=AddKeyButtonStyle}" Click="AddKeyButton_Click"></Button>
+                        Width="340" Header="Settings" IsOpen="False" Name="SettingsFlyout" Background="#FF1F1F1F">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Grid Name="FlyoutHeaderGrid" Height="40" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+                        <Button Style="{DynamicResource MetroCircleButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Width="40" Height="40" Margin="0,0,5,0" Click="AddKeyButton_Click" BorderBrush="LightBlue">
+                            <Rectangle Width="15" Height="15" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                                <Rectangle.OpacityMask>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_add}" />
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                        </Button>
+                    </Grid>
+                    <Grid Name="SettingsGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0,40,0,0">
+                    </Grid>
                 </Grid>
             </Controls:Flyout>
         </Controls:FlyoutsControl>
     </Controls:MetroWindow.Flyouts>
     <Grid Name="MainGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#FF2D2D30">
+        
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="70*"/>
         </Grid.ColumnDefinitions>
-        <Grid Name="ButtonsGrid" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0" Height="140" Width="60">
+        <Grid Name="ButtonsGrid" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0" Height="220" Width="60">
             <Button Style="{DynamicResource MetroCircleButtonStyle}" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Width="50" Height="50" Margin="0,5,5,0" Click="SettingsButton_Click" BorderBrush="LightBlue">
+                    Width="50" Height="50" Margin="0,170,5,0" Click="SettingsButton_Click" BorderBrush="LightBlue">
                 <Rectangle Width="25" Height="25" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
                     <Rectangle.OpacityMask>
                         <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_settings}" />
@@ -44,18 +54,35 @@
                 </Rectangle>
             </Button>
             <Button Style="{DynamicResource MetroCircleButtonStyle}" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Width="50" Height="50" Margin="0,60,5,0" Click="OpenFolderButton_Click" BorderBrush="LightBlue">
+                    Width="50" Height="50" Margin="0,5,5,0" Click="OpenFolderButton_Click" BorderBrush="LightBlue">
                 <Rectangle Width="25" Height="25" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
                     <Rectangle.OpacityMask>
-                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_folder}" />
+                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_folder_open}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </Button>
+                <Button Style="{DynamicResource MetroCircleButtonStyle}" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Width="50" Height="50" Margin="0,60,5,0" Click="OpenFileButton_Click" BorderBrush="LightBlue">
+                    <Rectangle Width="25" Height="25" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_image_snow}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </Button>
+            <Button Style="{DynamicResource MetroCircleButtonStyle}" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Width="50" Height="50" Margin="0,115,5,0" Click="FullScreenButton_Click" BorderBrush="LightBlue">
+                <Rectangle Width="25" Height="25" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_fullscreen}" />
                     </Rectangle.OpacityMask>
                 </Rectangle>
             </Button>
         </Grid>
-        <Grid Name="ImageGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0">
+        <Grid Name="ImageGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" Margin="0,0,60,0">
 
             <Image Name="Picture" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseDown="Image_MouseDown">
             </Image>
         </Grid>
+        
     </Grid>
 </Controls:MetroWindow>

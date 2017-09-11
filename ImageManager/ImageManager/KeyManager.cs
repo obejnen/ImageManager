@@ -4,6 +4,11 @@ namespace ImageManager
 {
 	class KeyManager
 	{
+		public enum KeyChangeStatus
+		{
+			ChangedSuccessfully, ChangeFailed 
+		}
+
 		private List<string> usedKeys;
 		private List<string> controlKeys;
 
@@ -16,24 +21,32 @@ namespace ImageManager
 			};
 		}
 
-		public bool IsKeyUsed(string key)
+		public bool IsKeyAvaivable(string key)
 		{
 			var index = usedKeys.IndexOf(key);
 			if (index == -1)
 				index = controlKeys.IndexOf(key);
 			if (index == -1)
-				return false;
-			return true;
+				return true;
+			return false;
 		}
 
-		public void AddKey(string key)
+		public KeyChangeStatus AddKey(string key)
 		{
-			usedKeys.Add(key);
+			if (IsKeyAvaivable(key) && key.Length == 1 && !string.IsNullOrEmpty(key))
+			{
+				usedKeys.Add(key);
+				return KeyChangeStatus.ChangedSuccessfully;
+			}
+			return KeyChangeStatus.ChangeFailed;
 		}
 
 		public void RemoveKey(string key)
 		{
-			usedKeys.Remove(key);
+			if (!IsKeyAvaivable(key))
+			{
+				usedKeys.Remove(key);
+			}
 		}
 	}
 }

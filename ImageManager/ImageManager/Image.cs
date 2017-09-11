@@ -24,7 +24,7 @@ namespace ImageManager
 				_img.BeginInit();
 				_img.CacheOption = BitmapCacheOption.OnLoad;
 				_img.UriSource = new Uri(path);
-				_img.DecodePixelWidth = 1280;
+				_img.DecodePixelWidth = 1920;
 				_img.EndInit();
 			}
 		}
