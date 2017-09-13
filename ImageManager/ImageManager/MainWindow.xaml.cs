@@ -203,13 +203,11 @@ namespace ImageManager
 					var nextImage = fileManager.GetNextImagePath(currentImage.FullPath);
 					ShowImage(nextImage);
                 }
-				//UpdateSettings();
 			}
 		}
 
 		private void FlyoutClose_Click(object sender, KeyEventArgs e)
 		{
-			//UpdateSettings();
 		}
 
 		private void Controls_KeyDown(object sender, KeyEventArgs e)
@@ -248,13 +246,7 @@ namespace ImageManager
 			var btn = (Button)sender;
 			keyManager.RemoveKey(controlLinesManager.GetBindedKey(btn));
             controlLinesManager.RemoveControlLine(btn, SettingsGrid);
-
-			//UpdateSettings();
-		}
-
-		private void SettingsFlyout_IsOpenChanged(object sender, RoutedEventArgs e)
-		{
-			//UpdateSettings();
+			UpdateSettings();
 		}
 
 		private void AppWindow_MouseMove(object sender, MouseEventArgs e)
