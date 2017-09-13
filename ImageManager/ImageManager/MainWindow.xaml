@@ -20,7 +20,7 @@
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
             <Controls:Flyout Grid.Row="1" Grid.Column="1" Position="Right" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                        Width="340" Header="Settings" IsOpen="False" Name="SettingsFlyout" Background="#FF1F1F1F" IsOpenChanged="SettingsFlyout_IsOpenChanged">
+                        Width="340" Header="Settings" IsOpen="False" Name="SettingsFlyout" Background="#FF1F1F1F">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid Name="FlyoutHeaderGrid" Height="40" VerticalAlignment="Top" HorizontalAlignment="Stretch">
                         <Button Style="{DynamicResource MetroCircleButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Top"

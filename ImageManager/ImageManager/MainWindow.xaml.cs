@@ -2,7 +2,6 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
-using System.Collections.Generic;
 using System.Windows.Threading;
 using System.Threading.Tasks;
 using System.IO;
@@ -25,6 +24,7 @@ namespace ImageManager
 	public partial class MainWindow : MetroWindow
 	{
 		private const string SettingsFileName = "settings.dat";
+		private const string FileTypesFilter = "Jpg images |*.jpg|Png images|*.png|All files|*.*";
 
 		private Image currentImage;
 		private FileManager fileManager = new FileManager();
@@ -47,22 +47,25 @@ namespace ImageManager
 
 		private void LoadSettings()
 		{
-			foreach(var set in settingsManager.AllSettings)
+			foreach(var setting in settingsManager.AllSettings)
 			{
 				ControlLine cl = controlLinesManager.CreateControlLine(DeleteKeyButton_Click, SubfolderTextBox_TextChanged,
 														KeyTextBox_TextChanged, Controls_KeyDown,
-														set.Key, set.SubfolderName, set.IsCopyFileMode);
+														setting.Key, setting.SubfolderName, setting.IsCopyFileMode);
 				AddControlLine(cl);
 			}
 		}
 
 		private async void UpdateSettings()
 		{
-			List<string> bindedKeys = controlLinesManager.GetBindedKeys();
-			List<string> subfolderNames = controlLinesManager.GetSubfolderNames();
-			List<bool?> isMoveFileModes = controlLinesManager.GetFileMods();
+			var settings = controlLinesManager.GetBindedSettings();
+			await Task.Factory.StartNew(() => settingsManager.RefreshSettings(settings));
 
-			await Task.Factory.StartNew(() => settingsManager.RefreshSettings(subfolderNames, bindedKeys, isMoveFileModes));
+			//List<string> bindedKeys = controlLinesManager.GetBindedKeys();
+			//List<string> subfolderNames = controlLinesManager.GetSubfolderNames();
+			//List<bool?> isMoveFileModes = controlLinesManager.GetFileMods();
+
+			//await Task.Factory.StartNew(() => settingsManager.RefreshSettings(subfolderNames, bindedKeys, isMoveFileModes));
 		}
 
 		private void SetFullscreenSettings(bool fullscreen)
@@ -82,30 +85,24 @@ namespace ImageManager
 		
         private string ShowSelectImageDialog()
         {
-            var dlg = new System.Windows.Forms.OpenFileDialog();
+	        var dlg = new System.Windows.Forms.OpenFileDialog { Filter = FileTypesFilter };
 
-            dlg.Filter = "Jpg images |*.jpg|Png images|*.png|All files|*.*";
-            if(dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                return dlg.FileName;
-            }
-
-            return String.Empty;
+	        return dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK 
+				? dlg.FileName 
+				: String.Empty;
         }
 
         private string ShowSelectFolderDialog()
 		{
-			var selectedPath = string.Empty;
-
 			using (var dlg = new System.Windows.Forms.FolderBrowserDialog())
 			{
 				if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
 				{
-					selectedPath = dlg.SelectedPath;
+					return dlg.SelectedPath;
 				}
 			}
 
-			return selectedPath;
+			return string.Empty;
 		}
 
 		private void ShowImage(string path)
@@ -121,6 +118,7 @@ namespace ImageManager
 		}
 
 		#region EventsHandlers
+
 		private void Image_MouseDown(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
@@ -135,6 +133,9 @@ namespace ImageManager
 			{
 				SetFullscreenSettings(!isFullScreenEnabled);
 			}
+
+			//temporrary exception for test
+			throw new Exception("Wrong button pressed");
 		}
 
 		private void AddKeyButton_Click(object sender, RoutedEventArgs e)
@@ -173,37 +174,43 @@ namespace ImageManager
 			}
         }
 
+		//todo: check if it works after refactoring
 		private async void MainWindow_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (SettingsFlyout.IsOpen != true && currentImage != null && Picture.Source != null)
+			if (SettingsFlyout.IsOpen || currentImage == null || Picture.Source == null)
+				return;
+
+			string nextImage;
+			string key = e.Key.ToString();
+
+			switch (e.Key)
 			{
-				string key = e.Key.ToString();
-				if (e.Key == Key.Right || e.Key == Key.Space)
-				{
-					var nextImage = fileManager.GetNextImagePath(currentImage.FullPath);
-					ShowImage(nextImage);
-					return;
-				}
-				if (e.Key == Key.Left || e.Key == Key.Back)
-				{
-					var previousImage = fileManager.GetPreviousImagePath(currentImage.FullPath);
-					ShowImage(previousImage);
-					return;
-				}
-				if (!keyManager.IsKeyAvaivable(e.Key.ToString()))
-				{
+				case Key.Right:
+				case Key.Space:
+					nextImage = fileManager.GetNextImagePath(currentImage.FullPath);
+					break;
+				case Key.Left:
+				case Key.Back:
+					nextImage = fileManager.GetPreviousImagePath(currentImage.FullPath);
+					break;
+				default:
+					if (keyManager.IsKeyAvaivable(e.Key.ToString()))
+						return;
+
 					var subfolderName = controlLinesManager.GetSubfolderName(e.Key.ToString());
-					bool? isCopyFileMode = controlLinesManager.IsMoveFileMode(key);
+					var isCopyFileMode = controlLinesManager.IsMoveFileMode(key);
 					var imagePath = currentImage.FullPath;
 
 					await Task.Factory.StartNew(() => fileManager.MoveFile(imagePath,
-											subfolderName,
-											isCopyFileMode));
-					
-					var nextImage = fileManager.GetNextImagePath(currentImage.FullPath);
-					ShowImage(nextImage);
-                }
+						subfolderName,
+						isCopyFileMode));
+
+					nextImage = fileManager.GetNextImagePath(currentImage.FullPath);
+					break;
 			}
+
+			if (!string.IsNullOrEmpty(nextImage))
+				ShowImage(nextImage);
 		}
 
 		private void FlyoutClose_Click(object sender, KeyEventArgs e)
@@ -262,6 +269,8 @@ namespace ImageManager
 			}
 		}
 
+		#endregion
+
 		private void StartCloseTimer()
 		{
 			isTimerEnabled = true;
@@ -283,4 +292,3 @@ namespace ImageManager
 		}
 	}
 }
-#endregion
