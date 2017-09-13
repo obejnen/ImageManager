@@ -77,6 +77,8 @@ namespace ImageManager
 
 		public string GetNextImagePath(string currentImagePath)
 		{
+			if (allImagesPath.Count == 0)
+				return null;
 			int currentImageIndex = allImagesPath.IndexOf(currentImagePath);
 
 			return currentImageIndex == allImagesPath.Count - 1 
