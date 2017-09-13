@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Controls;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using MahApps.Metro.Controls;
 
@@ -113,13 +114,20 @@ namespace ImageManager.ButtonBinding
 
 		public static ControlLine GetControlPanel(List<ControlLine> controlPanels, int index)
 		{
-			foreach (ControlLine cp in controlPanels)
-			{
-				if (cp.Index == index)
-					return cp;
-			}
+			//todo: consider this approach in other places
+			return controlPanels.FirstOrDefault(cp => cp.Index == index);
+			
+			//todo: then delete this unused message ))
 
-			return null;
+			//to remove: old part
+
+			//foreach (ControlLine cp in controlPanels)
+			//{
+			//	if (cp.Index == index)
+			//		return cp;
+			//}
+
+			//return null;
 		}
 
 		private void FillStackPanel()
@@ -129,10 +137,20 @@ namespace ImageManager.ButtonBinding
 
 		private void FillGrid()
 		{
-			ControlGrid.Children.Add(KeyTextBox);
-			ControlGrid.Children.Add(SubfolderTextBox);
-            ControlGrid.Children.Add(FileModeToggleSwitch);
-			ControlGrid.Children.Add(DeleteKeyButton);
+			// other style
+
+			Control[] gridControls =
+			{
+				KeyTextBox,
+				SubfolderTextBox,
+				FileModeToggleSwitch,
+				DeleteKeyButton
+			};
+
+			foreach (Control gridControl in gridControls)
+			{
+				ControlGrid.Children.Add(gridControl);
+			}
 		}
 
 		private Button CreateButton(ButtonType type)
@@ -181,10 +199,11 @@ namespace ImageManager.ButtonBinding
 
 		private RowDefinition CreateRowDefinition()
 		{
-			RowDefinition rd = new RowDefinition();
-			rd.Height = new GridLength(55, GridUnitType.Pixel);
-			rd.Name = String.Format(CONTROL_ROW_NAME, Index);
-			return rd;
+			return new RowDefinition
+			{
+				Height = new GridLength(55, GridUnitType.Pixel),
+				Name = String.Format(CONTROL_ROW_NAME, Index)
+			};
 		}
 
 		private StackPanel CreateStackPanel()

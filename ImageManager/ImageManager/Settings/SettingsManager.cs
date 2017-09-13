@@ -20,6 +20,15 @@ namespace ImageManager.Settings
 			AllSettings = LoadFromFile();
 		}
 
+		public void RefreshSettings(IEnumerable<Tuple<string, string, bool?>> settings)
+		{
+			AllSettings.Clear();
+			AllSettings.AddRange(settings.Select(s => new Settings(s.Item1, s.Item2, s.Item3)));
+			SaveInFile();
+		}
+
+		#region ToDelete
+
 		public void RefreshSettings(List<string> subfolderNames, List<string> bindedKeys, List<bool?> isMoveFileModes)
 		{
 			AllSettings.Clear();
@@ -33,26 +42,25 @@ namespace ImageManager.Settings
 
 		public void Add(string subfolderName, string bindedKey, bool? isMoveFileMode)
 		{
-			if (AllSettings.Where(settings => settings.SubfolderName == subfolderName
-											 || settings.Key == bindedKey).
-						FirstOrDefault() == null)
+			if (AllSettings.FirstOrDefault(settings => settings.SubfolderName == subfolderName || settings.Key == bindedKey) == null)
 				AllSettings.Add(new Settings(subfolderName, bindedKey, isMoveFileMode));
 			SaveInFile();
 		}
 
 		public void Remove(string subfolderName)
 		{
-			Settings stngs = AllSettings
-				.Where(settings => settings.SubfolderName == subfolderName)
-				.FirstOrDefault();
+			Settings stngs = AllSettings.FirstOrDefault(settings => settings.SubfolderName == subfolderName);
 			if (stngs != null)
 				AllSettings.Remove(stngs);
 			SaveInFile();
 		}
 
+		#endregion 
+
 		private void SaveInFile()
 		{
-			BinaryFormatter binFormat = new BinaryFormatter();
+			//todo: this method seems like a candidate for being called async
+			var binFormat = new BinaryFormatter();
 			using (Stream fStream = new FileStream(SettingsFileName, FileMode.Create, FileAccess.Write, FileShare.None))
 			{
 				binFormat.Serialize(fStream, this);
@@ -61,14 +69,13 @@ namespace ImageManager.Settings
 
 		private List<Settings> LoadFromFile()
 		{
-			BinaryFormatter binFormat = new BinaryFormatter();
-
 			if (!File.Exists(SettingsFileName))
 				return new List<Settings>();
 
 			using (Stream fStream = File.OpenRead(SettingsFileName))
 			{
-				 return fStream.Length != 0
+				var binFormat = new BinaryFormatter();
+				return fStream.Length != 0
 					? ((SettingsManager)binFormat.Deserialize(fStream)).AllSettings
 					: new List<Settings>();
 			}

@@ -45,6 +45,13 @@ namespace ImageManager.ButtonBinding
 			return cl;
 		}
 
+		public List<Tuple<string, string, bool?>> GetBindedSettings()
+		{
+			return BindingLines
+				.Where(line => line.SubfolderName != String.Empty)
+				.Select(line => new Tuple<string, string, bool?>(line.BindedKey, line.SubfolderName, line.IsMoveFileMode)).ToList();
+		}
+
 		public List<string> GetBindedKeys()
 		{
 			return BindingLines

@@ -23,12 +23,15 @@ namespace ImageManager
 
 		public bool IsKeyAvaivable(string key)
 		{
-			var index = usedKeys.IndexOf(key.ToUpper());
-			if (index == -1)
-				index = controlKeys.IndexOf(key.ToUpper());
-			if (index == -1)
-				return true;
-			return false;
+			//the better variant
+			return !usedKeys.Contains(key.ToUpper()) && !controlKeys.Contains(key.ToUpper());
+
+			//var index = usedKeys.IndexOf(key.ToUpper());
+			//if (index == -1)
+			//	index = controlKeys.IndexOf(key.ToUpper());
+			//if (index == -1)
+			//	return true;
+			//return false;
 		}
 
 		public KeyChangeStatus AddKey(string key)

@@ -9,7 +9,7 @@ namespace ImageManager
 	internal class FileManager
 	{
 		private List<string> allImagesPath;
-		private string openedDirectory;
+		private string currentDirectory;
 
 		public void RemoveImage(string path)
 		{
@@ -27,7 +27,7 @@ namespace ImageManager
 
 		private void UpdateFileList()
 		{
-			LoadDirectory(openedDirectory);
+			LoadDirectory(currentDirectory);
 		}
 
 		private void StartUpdateTimer()
@@ -90,7 +90,7 @@ namespace ImageManager
 				return null;
 
 			allImagesPath = Directory.GetFiles(path).ToList();
-			openedDirectory = Path.GetDirectoryName(allImagesPath.FirstOrDefault());
+			currentDirectory = Path.GetDirectoryName(allImagesPath.FirstOrDefault());
 
 			return allImagesPath?.FirstOrDefault();
 		}
