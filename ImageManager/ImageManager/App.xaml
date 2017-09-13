@@ -50,11 +50,11 @@
                 <Setter Property="Width" Value="120"></Setter>
             </Style>
             <Style TargetType="{x:Type Controls:ToggleSwitch}" x:Key="FileModeSwitchStyle">
-                <Setter Property="OffLabel" Value="Copy"></Setter>
+                <Setter Property="OffLabel" Value="Move"></Setter>
                 <Setter Property="VerticalAlignment" Value="Top"></Setter>
                 <Setter Property="HorizontalAlignment" Value="Left"></Setter>
-                <Setter Property="IsChecked" Value="True"></Setter>
-                <Setter Property="OnLabel" Value="Move"></Setter>
+                <Setter Property="IsChecked" Value="False"></Setter>
+                <Setter Property="OnLabel" Value="Copy"></Setter>
                 <Setter Property="OnSwitchBrush" Value="#FF129DD9"></Setter>
                 <Setter Property="OffSwitchBrush" Value="#FF129DD9"></Setter>
                 <Setter Property="VerticalAlignment" Value="Top"></Setter>
@@ -65,7 +65,7 @@
                 <Setter Property="Margin" Value="180,10,0,0"></Setter>
             </Style>
 
-            
+
             <!--<Style TargetType="{x:Type Button}" x:Key="AddKeyButtonStyle" BasedOn="{StaticResource MetroFlatButton}">
                 <Setter Property="VerticalAlignment" Value="Top"></Setter>
                 <Setter Property="HorizontalAlignment" Value="Right"></Setter>

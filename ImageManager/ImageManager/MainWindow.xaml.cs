@@ -3,9 +3,10 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
 using System.Collections.Generic;
-using System.Threading;
+using System.Windows.Threading;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics;
 using MahApps.Metro.Controls;
 using ImageManager.ButtonBinding;
 using ImageManager.Settings;
@@ -31,6 +32,8 @@ namespace ImageManager
 		private SettingsManager settingsManager;
         private ControlLinesManager controlLinesManager = new ControlLinesManager();
 		private bool isFullScreenEnabled = false;
+		private bool isTimerEnabled = false;
+		ProcessStartInfo pi = new ProcessStartInfo();
 
 		public MainWindow()
 		{
@@ -196,20 +199,17 @@ namespace ImageManager
 					await Task.Factory.StartNew(() => fileManager.MoveFile(imagePath,
 											subfolderName,
 											isCopyFileMode));
-					//fileManager.MoveFile(currentImage.FullPath,
-					//						subfolderName,
-					//						isCopyFileMode);
-
+					
 					var nextImage = fileManager.GetNextImagePath(currentImage.FullPath);
 					ShowImage(nextImage);
                 }
-				UpdateSettings();
+				//UpdateSettings();
 			}
 		}
 
 		private void FlyoutClose_Click(object sender, KeyEventArgs e)
 		{
-			UpdateSettings();
+			//UpdateSettings();
 		}
 
 		private void Controls_KeyDown(object sender, KeyEventArgs e)
@@ -249,12 +249,43 @@ namespace ImageManager
 			keyManager.RemoveKey(controlLinesManager.GetBindedKey(btn));
             controlLinesManager.RemoveControlLine(btn, SettingsGrid);
 
-			UpdateSettings();
+			//UpdateSettings();
 		}
 
 		private void SettingsFlyout_IsOpenChanged(object sender, RoutedEventArgs e)
 		{
+			//UpdateSettings();
+		}
+
+		private void AppWindow_MouseMove(object sender, MouseEventArgs e)
+		{
+			if (ButtonsGrid.Visibility != Visibility.Visible)
+			{
+				ButtonsGrid.Visibility = Visibility.Visible;
+			}
+			if (!isTimerEnabled)
+			{
+				StartCloseTimer();
+			}
+		}
+
+		private void StartCloseTimer()
+		{
+			isTimerEnabled = true;
+			DispatcherTimer timer = new DispatcherTimer();
+			timer.Interval = TimeSpan.FromSeconds(2d);
+			timer.Tick += TimerTick;
+			timer.Start();
+		}
+
+		private void TimerTick(object sender, EventArgs e)
+		{
+			DispatcherTimer timer = (DispatcherTimer)sender;
+			timer.Stop();
+			timer.Tick -= TimerTick;
 			UpdateSettings();
+			ButtonsGrid.Visibility = Visibility.Hidden;
+			isTimerEnabled = false;
 		}
 	}
 }
