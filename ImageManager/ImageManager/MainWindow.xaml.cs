@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
 using System.Collections.Generic;
+using System.Threading;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using MahApps.Metro.Controls;
 using ImageManager.ButtonBinding;
+using ImageManager.Settings;
 
 namespace ImageManager
 {
@@ -27,28 +27,42 @@ namespace ImageManager
 		private Image currentImage;
 		private FileManager fileManager = new FileManager();
 		private KeyManager keyManager = new KeyManager();
-		//private Settings settings = new Settings();
+		private SettingsManager settingsManager;
         private ControlLinesManager controlLinesManager = new ControlLinesManager();
 		private bool isFullScreenEnabled = false;
+		TimerCallback timeCB;
+		Timer timer;
 
 		public MainWindow()
 		{
 			InitializeComponent();
 			//LoadSettingsFromFile();
 			WindowButtonCommandsOverlayBehavior = WindowCommandsOverlayBehavior.Never;
+			settingsManager = new SettingsManager("settings.dat");
+			LoadSettings();
+			timeCB = new TimerCallback(UpdateSettings);
+			timer = new Timer(timeCB, null, 500, 10000);
+
 		}
 
-		private void Image_MouseDown(object sender, MouseButtonEventArgs e)
+		private void LoadSettings()
 		{
-			if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
+			foreach(var set in settingsManager.AllSettings)
 			{
-				SetFullscreenSettings(!isFullScreenEnabled);
+				ControlLine cl = controlLinesManager.CreateControlLine(DeleteKeyButton_Click, SubfolderTextBox_TextChanged,
+														KeyTextBox_TextChanged, Controls_KeyDown,
+														set.Key, set.SubfolderName, set.IsCopyFileMode);
+				AddControlLine(cl);
 			}
 		}
 
-		private void FullScreenButton_Click(object sender, RoutedEventArgs e)
+		private void UpdateSettings(object state)
 		{
-			SetFullscreenSettings(!isFullScreenEnabled);
+			List<string> bindedKeys = controlLinesManager.GetBindedKeys();
+			List<string> subfolderNames = controlLinesManager.GetSubfolderNames();
+			List<bool?> isMoveFileModes = controlLinesManager.GetFileMods();
+
+			settingsManager.RefreshSettings(subfolderNames, bindedKeys, isMoveFileModes);
 		}
 
 		private void SetFullscreenSettings(bool fullscreen)
@@ -56,7 +70,7 @@ namespace ImageManager
 			WindowStyle = fullscreen ? WindowStyle.None : WindowStyle.SingleBorderWindow;
 			ButtonsGrid.Visibility = fullscreen ? Visibility.Hidden : Visibility.Visible;
 			ResizeMode = fullscreen ? ResizeMode.NoResize : ResizeMode.CanResize;
-			WindowState = fullscreen ? WindowState.Maximized : WindowState.Normal;
+            WindowState = fullscreen ? WindowState.Maximized : WindowState.Normal;
 
 			IgnoreTaskbarOnMaximize = fullscreen;
 			ShowTitleBar = !fullscreen;
@@ -65,36 +79,7 @@ namespace ImageManager
 			ShowMinButton = !fullscreen;
 			ShowMaxRestoreButton = !fullscreen;
 		}
-
-		//todo: move method to settings manager
-		//private void SaveSettings(object sender)
-		//{
-		//	BinaryFormatter binFormat = new BinaryFormatter();
-		//	using (Stream fStream = new FileStream(SettingsFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-		//	{
-		//		binFormat.Serialize(fStream, sender);
-		//	}
-		//}
-
-		//todo: move method to settings manager (probably to constructor)
-		//private void LoadSettingsFromFile()
-		//{
-		//	BinaryFormatter binFormat = new BinaryFormatter();
-		//	Settings settingsFromFile;
-
-		//	if (!File.Exists(SettingsFileName))
-		//		return;
-
-		//	using (Stream fStream = File.OpenRead(SettingsFileName))
-		//	{
-		//		settingsFromFile = fStream.Length != 0 
-		//			? (Settings) binFormat.Deserialize(fStream) 
-		//			: new Settings();
-		//	}
-
-		//	SettingsManager.LoadSettings(controlPanels, settingsFromFile, CreateControlPanel);
-		//}
-
+		
         private string ShowSelectImageDialog()
         {
             var dlg = new System.Windows.Forms.OpenFileDialog();
@@ -136,11 +121,34 @@ namespace ImageManager
 		}
 
 		#region EventsHandlers
+		private void Image_MouseDown(object sender, MouseButtonEventArgs e)
+		{
+			if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
+			{
+				SetFullscreenSettings(!isFullScreenEnabled);
+			}
+		}
+
+		private void FullScreenButton_Click(object sender, RoutedEventArgs e)
+		{
+			if (Picture.Source != null)
+			{
+				SetFullscreenSettings(!isFullScreenEnabled);
+			}
+		}
+
 		private void AddKeyButton_Click(object sender, RoutedEventArgs e)
 		{
-			//CreateControlPanel();
-			controlLinesManager.AddControlLine(SettingsGrid, DeleteKeyButton_Click, SubfolderTextBox_TextChanged,
+			ControlLine cl = controlLinesManager.CreateControlLine(DeleteKeyButton_Click, SubfolderTextBox_TextChanged,
 				KeyTextBox_TextChanged, Controls_KeyDown);
+			AddControlLine(cl);
+		}
+
+		private void AddControlLine(ControlLine cl)
+		{
+			SettingsGrid.RowDefinitions.Add(cl.ControlRow);
+			SettingsGrid.Children.Add(cl.ControlStackPanel);
+			//UpdateSettings();
 		}
 
 		private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -154,7 +162,6 @@ namespace ImageManager
 			var firstImage = fileManager.LoadDirectory(path);
 			ShowImage(firstImage);
 		}
-
 
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
         {
@@ -176,30 +183,23 @@ namespace ImageManager
 				}
 				if (e.Key == Key.Left || e.Key == Key.Back)
 				{
-					//todo: send only path instead of full image
 					var previousImage = fileManager.GetPreviousImagePath(currentImage.FullPath);
 					ShowImage(previousImage);
 					return;
 				}
 				if (!keyManager.IsKeyAvaivable(e.Key.ToString()))
 				{
+					var nextImage = fileManager.GetNextImagePath(currentImage.FullPath);
+					ShowImage(nextImage);
+
 					var subfolderName = controlLinesManager.GetSubfolderName(e.Key.ToString());
-					var imageDirectoryName = Path.GetDirectoryName(currentImage.FullPath);
-					var newImagePath = Path.Combine(imageDirectoryName, subfolderName);
+					bool? isCopyFileMode = controlLinesManager.IsMoveFileMode(key);
 
-                    fileManager.CreateFolder(newImagePath);
-                    var nextImage = fileManager.GetNextImagePath(currentImage.FullPath);
-                    ShowImage(nextImage);
-
-                    if(controlLinesManager.GetFileMode(key) == ButtonBinding.FileMode.Move)
-					{ 
-                        fileManager.MoveImage(currentImage.FullPath, newImagePath);
-                    }
-                    else
-                    {
-                        fileManager.CopyImage(currentImage.FullPath, newImagePath);
-                    }
+					fileManager.MoveFile(currentImage.FullPath,
+											subfolderName,
+											isCopyFileMode);
                 }
+				//UpdateSettings();
 			}
 		}
 
@@ -239,6 +239,8 @@ namespace ImageManager
 			var btn = (Button)sender;
 			keyManager.RemoveKey(controlLinesManager.GetBindedKey(btn));
             controlLinesManager.RemoveControlLine(btn, SettingsGrid);
+
+			//UpdateSettings();
 		}
 	}
 }

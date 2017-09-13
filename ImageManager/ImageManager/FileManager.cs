@@ -22,7 +22,24 @@ namespace ImageManager
             }
         }
 
-        public void CopyImage(string imgFullPath, string directoryPath)
+        public void MoveFile(string filePath, string subfolderName, bool? isCopyMode)
+        {
+			var imageDirectoryName = Path.GetDirectoryName(filePath);
+			var newImagePath = Path.Combine(imageDirectoryName, subfolderName);
+
+			CreateFolder(newImagePath);
+
+			if (isCopyMode == true)
+			{
+				Copy(filePath, newImagePath);
+			}
+			else
+			{
+				Move(filePath, newImagePath);
+			}
+		}
+
+        private void Copy(string imgFullPath, string directoryPath)
         {
             var newImgPath = Path.Combine(directoryPath, Path.GetFileName(imgFullPath));
 
@@ -32,7 +49,7 @@ namespace ImageManager
             }
         }
 
-        public void MoveImage(string imgFullPath, string directoryPath)
+        private void Move(string imgFullPath, string directoryPath)
         {
             var newImgPath = Path.Combine(directoryPath, Path.GetFileName(imgFullPath));
             //todo: add error if file already exist

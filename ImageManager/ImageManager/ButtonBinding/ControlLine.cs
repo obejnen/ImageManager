@@ -41,15 +41,7 @@ namespace ImageManager.ButtonBinding
 				KeyTextBox.Text = value;
 			}
 		}
-		public FileMode OperationMode
-		{
-			get
-			{
-				if (FileModeToggleSwitch.IsChecked == true)
-					return FileMode.Move;
-				return FileMode.Copy;
-			}
-		}
+		public bool? IsMoveFileMode => FileModeToggleSwitch.IsChecked;
 		public RowDefinition ControlRow { get; }
 		public StackPanel ControlStackPanel { get; }
 		private Button DeleteKeyButton { get; set; }
@@ -69,6 +61,13 @@ namespace ImageManager.ButtonBinding
 		private enum ButtonType
 		{
 			AddKey, DeleteKey
+		}
+
+		public void FillData(string bindedKey, string subfolderName, bool? isMoveFileMode)
+		{
+			KeyTextBox.Text = bindedKey;
+			SubfolderTextBox.Text = subfolderName;
+			FileModeToggleSwitch.IsChecked = isMoveFileMode;
 		}
 
 		private void ChangeIndex(int index)

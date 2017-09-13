@@ -24,15 +24,46 @@ namespace ImageManager.ButtonBinding
 			grid.Children.RemoveAt(index);
         }
 
-		public void AddControlLine(Grid grid, RoutedEventHandler DeleteControlLineButton_Click,
+		public ControlLine CreateControlLine(RoutedEventHandler DeleteControlLineButton_Click,
 			TextChangedEventHandler SubfolderName_Changed, TextChangedEventHandler BindKey_Changed,
 			 System.Windows.Input.KeyEventHandler BindKey_KeyDown)
 		{
 			var cl = new ControlLine(BindingLines.Count);
 			cl.AddEventHandlers(DeleteControlLineButton_Click, SubfolderName_Changed, BindKey_Changed, BindKey_KeyDown);
-			grid.RowDefinitions.Add(cl.ControlRow);
-			grid.Children.Add(cl.ControlStackPanel);
 			BindingLines.Add(cl);
+			return cl;
+		}
+
+		public ControlLine CreateControlLine(RoutedEventHandler DeleteControlLineButton_Click,
+			TextChangedEventHandler SubfolderName_Changed, TextChangedEventHandler BindKey_Changed,
+			 System.Windows.Input.KeyEventHandler BindKey_KeyDown, string bindedKey, string subfolderName, bool? isMoveFileMode)
+		{
+			var cl = new ControlLine(BindingLines.Count);
+			cl.AddEventHandlers(DeleteControlLineButton_Click, SubfolderName_Changed, BindKey_Changed, BindKey_KeyDown);
+			cl.FillData(bindedKey, subfolderName, isMoveFileMode);
+			BindingLines.Add(cl);
+			return cl;
+		}
+
+		public List<string> GetBindedKeys()
+		{
+			return BindingLines
+				.Where(line => line.SubfolderName != String.Empty)
+				.Select(line => line.BindedKey).ToList();
+		}
+
+		public List<string> GetSubfolderNames()
+		{
+			return BindingLines
+				.Where(line => line.SubfolderName != String.Empty)
+				.Select(line => line.SubfolderName).ToList();
+		}
+
+		public List<bool?> GetFileMods()
+		{
+			return BindingLines
+				.Where(line => line.SubfolderName != String.Empty)
+				.Select(line => line.IsMoveFileMode).ToList();
 		}
 
 		public string GetBindedKey(Button btn)
@@ -45,9 +76,9 @@ namespace ImageManager.ButtonBinding
 			return BindingLines.FirstOrDefault(line => line.BindedKey == key).SubfolderName;
 		}
 
-		public FileMode GetFileMode(string key)
+		public bool? IsMoveFileMode(string key)
 		{
-			return BindingLines.FirstOrDefault(line => line.BindedKey == key).OperationMode;
+			return BindingLines.FirstOrDefault(line => line.BindedKey == key).IsMoveFileMode;
 		}
 
 		public void BindKeyFromTextBox(TextBox textBox)
