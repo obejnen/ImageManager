@@ -2,16 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Threading;
 
 namespace ImageManager
 {
 	internal class FileManager
 	{
 		private List<string> allImagesPath;
+		private string openedDirectory;
 
 		public void RemoveImage(string path)
 		{
 			allImagesPath.Remove(path);
+			//StartUpdateTimer();
 		}
 
         public void CreateFolder(string path)
@@ -21,6 +24,27 @@ namespace ImageManager
                 Directory.CreateDirectory(path);
             }
         }
+
+		private void UpdateFileList()
+		{
+			LoadDirectory(openedDirectory);
+		}
+
+		private void StartUpdateTimer()
+		{
+			DispatcherTimer timer = new DispatcherTimer();
+			timer.Interval = TimeSpan.FromSeconds(1d);
+			timer.Tick += TimerTick;
+			timer.Start();
+		}
+
+		private void TimerTick(object sender, EventArgs e)
+		{
+			DispatcherTimer timer = (DispatcherTimer)sender;
+			timer.Stop();
+			timer.Tick -= TimerTick;
+			UpdateFileList();
+		}
 
         public void MoveFile(string filePath, string subfolderName, bool? isCopyMode)
         {
@@ -66,6 +90,7 @@ namespace ImageManager
 				return null;
 
 			allImagesPath = Directory.GetFiles(path).ToList();
+			openedDirectory = Path.GetDirectoryName(allImagesPath.FirstOrDefault());
 
 			return allImagesPath?.FirstOrDefault();
 		}

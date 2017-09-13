@@ -262,6 +262,7 @@ namespace ImageManager
 			if (ButtonsGrid.Visibility != Visibility.Visible)
 			{
 				ButtonsGrid.Visibility = Visibility.Visible;
+				this.Cursor = Cursors.Arrow;
 			}
 			if (!isTimerEnabled)
 			{
@@ -285,6 +286,7 @@ namespace ImageManager
 			timer.Tick -= TimerTick;
 			UpdateSettings();
 			ButtonsGrid.Visibility = Visibility.Hidden;
+			this.Cursor = Cursors.None;
 			isTimerEnabled = false;
 		}
 	}
