@@ -14,13 +14,14 @@
 
                       WindowTransitionsEnabled="False"
                       WindowStartupLocation="CenterOwner"
-                      ShowTitleBar="True">
+                      ShowTitleBar="True"
+                      MouseMove="AppWindow_MouseMove">
     <!--<Controls:MetroWindow.Resources>
     </Controls:MetroWindow.Resources>-->
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
             <Controls:Flyout Grid.Row="1" Grid.Column="1" Position="Right" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                        Width="340" Header="Settings" IsOpen="False" Name="SettingsFlyout" Background="#FF1F1F1F" IsOpenChanged="SettingsFlyout_IsOpenChanged">
+                        Width="340" Header="Settings" IsOpen="False" Name="SettingsFlyout" Background="#FF1F1F1F">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid Name="FlyoutHeaderGrid" Height="40" VerticalAlignment="Top" HorizontalAlignment="Stretch">
                         <Button Style="{DynamicResource MetroCircleButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Top"
@@ -42,7 +43,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="70*"/>
         </Grid.ColumnDefinitions>
-        <Grid Name="ImageGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" Margin="0,0,0,0" MouseMove="AppWindow_MouseMove">
+        <Grid Name="ImageGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" Margin="0,0,0,0">
 
             <Image Name="Picture" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseDown="Image_MouseDown">
             </Image>
@@ -67,14 +68,14 @@
                     </Rectangle.OpacityMask>
                 </Rectangle>
             </Button>
-                <Button Style="{DynamicResource MetroCircleButtonStyle}" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top"
+            <Button Style="{DynamicResource MetroCircleButtonStyle}" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top"
                     Width="50" Height="50" Margin="0,60,5,0" Click="OpenFileButton_Click" BorderBrush="LightBlue">
-                    <Rectangle Width="25" Height="25" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
-                        <Rectangle.OpacityMask>
-                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_image_snow}" />
-                        </Rectangle.OpacityMask>
-                    </Rectangle>
-                </Button>
+                <Rectangle Width="25" Height="25" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_image_snow}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </Button>
             <Button Style="{DynamicResource MetroCircleButtonStyle}" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top"
                     Width="50" Height="50" Margin="0,115,5,0" Click="FullScreenButton_Click" BorderBrush="LightBlue">
                 <Rectangle Width="25" Height="25" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
@@ -84,6 +85,26 @@
                 </Rectangle>
             </Button>
         </Grid>
-        
+        <!--<Grid Name="NotificationsGrid" VerticalAlignment="Top" HorizontalAlignment="Left" Width="350" Height="200"
+              Margin="45,0,0,0">
+            <Grid.Background>
+                <SolidColorBrush Color="Black" Opacity="0.7"></SolidColorBrush>
+            </Grid.Background>
+            <Button VerticalAlignment="Top" HorizontalAlignment="Right" Height="30" Width="60"
+                    Content="Clear all" Style="{DynamicResource SquareButtonStyle}" BorderBrush="{x:Null}" Background="{x:Null}">
+            </Button>
+            <Grid Name="NotificationsContentGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="5,35,5,5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"></RowDefinition>
+                    <RowDefinition Height="25"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <Grid.Background>
+                        <SolidColorBrush Color="White" Opacity="0.3"></SolidColorBrush>
+                    </Grid.Background>
+                    <Label Content="notification" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                </Grid>
+            </Grid>
+        </Grid>-->
     </Grid>
 </Controls:MetroWindow>

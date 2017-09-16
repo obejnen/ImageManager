@@ -55,7 +55,14 @@ namespace ImageManager
 
 			if (isCopyMode == true)
 			{
-				Copy(filePath, newImagePath);
+				try
+				{
+					Copy(filePath, newImagePath);
+				}
+				catch
+				{
+					throw new Exception();
+				}
 			}
 			else
 			{

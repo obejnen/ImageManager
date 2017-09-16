@@ -17,20 +17,21 @@ namespace ImageManager.ButtonBinding
 		const string KEY_TEXTBOX_NAME = "KeyTextBox{0}";
 		const string DIRECTORY_NAME_TEXTBOX_NAME = "SubfolderTextBox{0}";
 		const string CONTROL_ROW_NAME = "ControlRow{0}";
-        const string TOGGLESWITCH_NAME = "ToggleSwtich{0}";
+		const string TOGGLESWITCH_NAME = "ToggleSwtich{0}";
 		const string ADD_KEY_BUTTON_NAME = "AddKeyButton";
+		const int ROW_HEIGHT = 55;
 
-        public int Index
-        {
-            get { return lineIndex; }
-            set
-            {
+		public int Index
+		{
+			get { return lineIndex; }
+			set
+			{
 				if (value >= 0)
 					ChangeIndex(value);
-            }
-        }
-        public string SubfolderName => SubfolderTextBox.Text;
-        public string BindedKey
+			}
+		}
+		public string SubfolderName => SubfolderTextBox.Text;
+		public string BindedKey
 		{
 			get
 			{
@@ -47,11 +48,11 @@ namespace ImageManager.ButtonBinding
 		private Button DeleteKeyButton { get; set; }
 		private TextBox KeyTextBox { get; set; }
 		private TextBox SubfolderTextBox { get; set; }
-        private ToggleSwitch FileModeToggleSwitch { get; set; }
+		private ToggleSwitch FileModeToggleSwitch { get; set; }
 		private Grid ControlGrid { get; }
-		
 
-        private int lineIndex;
+
+		private int lineIndex;
 
 		private enum TextBoxType
 		{
@@ -92,7 +93,7 @@ namespace ImageManager.ButtonBinding
 			DeleteKeyButton = CreateButton(ButtonType.DeleteKey);
 			KeyTextBox = CreateTextBox(TextBoxType.KeyTextBox);
 			SubfolderTextBox = CreateTextBox(TextBoxType.SubfolderTextBox);
-            FileModeToggleSwitch = CreateToggleSwitch();
+			FileModeToggleSwitch = CreateToggleSwitch();
 
 			ControlRow = CreateRowDefinition();
 			ControlGrid = CreateGrid();
@@ -111,17 +112,6 @@ namespace ImageManager.ButtonBinding
 			KeyTextBox.PreviewKeyDown += BindKey_KeyDown;
 		}
 
-		public static ControlLine GetControlPanel(List<ControlLine> controlPanels, int index)
-		{
-			foreach (ControlLine cp in controlPanels)
-			{
-				if (cp.Index == index)
-					return cp;
-			}
-
-			return null;
-		}
-
 		private void FillStackPanel()
 		{
 			ControlStackPanel.Children.Add(ControlGrid);
@@ -129,10 +119,18 @@ namespace ImageManager.ButtonBinding
 
 		private void FillGrid()
 		{
-			ControlGrid.Children.Add(KeyTextBox);
-			ControlGrid.Children.Add(SubfolderTextBox);
-            ControlGrid.Children.Add(FileModeToggleSwitch);
-			ControlGrid.Children.Add(DeleteKeyButton);
+			Control[] gridControls =
+			{
+				KeyTextBox,
+				SubfolderTextBox,
+				FileModeToggleSwitch,
+				DeleteKeyButton
+			};
+
+			foreach (Control gridControl in gridControls)
+			{
+				ControlGrid.Children.Add(gridControl);
+			}
 		}
 
 		private Button CreateButton(ButtonType type)
@@ -168,23 +166,24 @@ namespace ImageManager.ButtonBinding
 			return textBox;
 		}
 
-        private ToggleSwitch CreateToggleSwitch()
-        {
-            ToggleSwitch ts = new ToggleSwitch
-            {
-                Name = String.Format(TOGGLESWITCH_NAME, Index)
-            };
+		private ToggleSwitch CreateToggleSwitch()
+		{
+			ToggleSwitch ts = new ToggleSwitch
+			{
+				Name = String.Format(TOGGLESWITCH_NAME, Index)
+			};
 
-            ts.Style = ts.FindResource("FileModeSwitchStyle") as Style;
-            return ts;
-        }
+			ts.Style = ts.FindResource("FileModeSwitchStyle") as Style;
+			return ts;
+		}
 
 		private RowDefinition CreateRowDefinition()
 		{
-			RowDefinition rd = new RowDefinition();
-			rd.Height = new GridLength(55, GridUnitType.Pixel);
-			rd.Name = String.Format(CONTROL_ROW_NAME, Index);
-			return rd;
+			return new RowDefinition
+			{
+				Height = new GridLength(ROW_HEIGHT, GridUnitType.Pixel),
+				Name = String.Format(CONTROL_ROW_NAME, Index)
+			};
 		}
 
 		private StackPanel CreateStackPanel()

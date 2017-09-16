@@ -20,6 +20,13 @@ namespace ImageManager.Settings
 			AllSettings = LoadFromFile();
 		}
 
+		public void RefreshSettings(IEnumerable<Tuple<string, string, bool?>> settings)
+		{
+			AllSettings.Clear();
+			AllSettings.AddRange(settings.Select(s => new Settings(s.Item1, s.Item2, s.Item3)));
+			SaveInFile();
+		}
+
 		public void RefreshSettings(List<string> subfolderNames, List<string> bindedKeys, List<bool?> isMoveFileModes)
 		{
 			AllSettings.Clear();

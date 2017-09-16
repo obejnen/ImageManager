@@ -9,6 +9,7 @@ namespace ImageManager.ButtonBinding
 	internal class ControlLinesManager
 	{
 		private List<ControlLine> BindingLines { get; set; }
+		public int ControlLinesCount => BindingLines.Count;
 
 		public ControlLinesManager()
 		{
@@ -39,10 +40,17 @@ namespace ImageManager.ButtonBinding
 			 System.Windows.Input.KeyEventHandler BindKey_KeyDown, string bindedKey, string subfolderName, bool? isMoveFileMode)
 		{
 			var cl = new ControlLine(BindingLines.Count);
-			cl.AddEventHandlers(DeleteControlLineButton_Click, SubfolderName_Changed, BindKey_Changed, BindKey_KeyDown);
 			cl.FillData(bindedKey, subfolderName, isMoveFileMode);
+			cl.AddEventHandlers(DeleteControlLineButton_Click, SubfolderName_Changed, BindKey_Changed, BindKey_KeyDown);
 			BindingLines.Add(cl);
 			return cl;
+		}
+
+		public List<Tuple<string, string, bool?>> GetBindedSettings()
+		{
+			return BindingLines
+				.Where(line => line.SubfolderName != String.Empty)
+				.Select(line => new Tuple<string, string, bool?>(line.BindedKey, line.SubfolderName, line.IsMoveFileMode)).ToList();
 		}
 
 		public List<string> GetBindedKeys()
